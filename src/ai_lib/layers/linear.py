@@ -10,6 +10,11 @@ class Linear(Layer):
         self.W = np.random.uniform(-xavier, xavier, (n_out, n_input))
         self.b = np.zeros((n_out, 1))
 
+        self.grad_W = None
+        self.grad_b = None
+        self.input = None
+        self.output = None
+
     def forward(self, X):
         self.input = X
         self.output = np.dot(self.W, self.input) + self.b
