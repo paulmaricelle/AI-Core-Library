@@ -21,14 +21,22 @@ class Linear(Layer):
         return self.output
     
     def backward(self, grad_wrt_output):
-        batch_size = self.input.shape[1]
-
         #Gradient par rapport aux poids
-        self.grad_W = np.dot(grad_wrt_output, self.input.T)/batch_size
-
+        grad_W_current = np.dot(grad_wrt_output, self.input.T)
+        
         #Gradient par rapport au biais
-        self.grad_b = np.sum(grad_wrt_output, axis=1, keepdims=True)/batch_size
+        grad_b_current = np.sum(grad_wrt_output, axis=1, keepdims=True)
+        
+        grad_wrt_input = np.dot(self.W.T, grad_wrt_output)
 
-        grad_wrt_input = np.dot(self.W.T, grad_wrt_output)/batch_size
+        if self.grad_W is None:
+            self.grad_W = grad_W_current
+        else:
+            self.grad_W += grad_W_current
+
+        if self.grad_b is None:
+            self.grad_b = grad_b_current
+        else:
+            self.grad_b += grad_b_current
 
         return grad_wrt_input
