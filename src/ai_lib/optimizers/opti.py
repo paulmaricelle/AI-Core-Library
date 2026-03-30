@@ -20,7 +20,7 @@ class Optimizer:
             self.params += layer.get_params()
         self._init_state()
 
-    def step(self):
+    def step(self, accumulation_steps):
         raise NotImplementedError("Méthode step non implémentée")
 
     def _init_state(self):

@@ -11,14 +11,13 @@ class Momentum(Optimizer):
     def _init_state(self):
         self.momentums = [np.zeros_like(p) for p in self.params]
         
-    def step(self):
+    def step(self, accumulation_steps):
+        self.get_grads()
         if len(self.params) != len(self.grads):
             raise ValueError(f"Mismatch: Optimizer has {len(self.params)} params "
                      f"but received {len(self.grads)} gradients.")
         
-        self.get_grads()
-        
         for i in range(len(self.params)):
-            self.momentums[i] = self.mu * self.momentums[i] + (1-self.mu) * self.grads[i]
+            self.momentums[i] = self.mu * self.momentums[i] + ((1-self.mu)/accumulation_steps) * self.grads[i]
             self.params[i] -= self.lr * self.momentums[i]
 

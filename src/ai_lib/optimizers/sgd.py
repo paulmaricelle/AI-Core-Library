@@ -8,12 +8,11 @@ class Sgd(Optimizer):
     def _init_state(self):
         pass
 
-    def step(self):
+    def step(self, accumulation_steps):
+        self.get_grads()
         if len(self.params) != len(self.grads):
             raise ValueError(f"Mismatch: Optimizer has {len(self.params)} params "
                      f"but received {len(self.grads)} gradients.")
-        
-        self.get_grads()
 
         for i in range(len(self.params)):
-            self.params[i] -= self.lr * self.grads[i]
+            self.params[i] -= self.lr * self.grads[i] / accumulation_steps
