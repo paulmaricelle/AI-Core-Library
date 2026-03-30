@@ -45,12 +45,11 @@ class Tanh(Layer):
         self.output = None
 
     def forward(self, X):
-        self.input = X
         self.output = np.tanh(X)
         return self.output
     
     def backward(self, grad_wrt_output):
-        return grad_wrt_output * (1 - self.input ** 2)
+        return grad_wrt_output * (1 - self.output ** 2)
     
     def get_params(self):
         return []

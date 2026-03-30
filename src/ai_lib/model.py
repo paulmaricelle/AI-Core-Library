@@ -24,7 +24,7 @@ class Model:
         n_samples = X.shape[1]
 
         #Printing period
-        period = 10**(int(np.log10(epochs)-2))
+        period = max(1, 10**(int(np.log10(epochs)-2)))
         for epoch in range(epochs):
             indices = np.random.permutation(n_samples)
             X_shuffled = X[:, indices]

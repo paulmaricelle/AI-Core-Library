@@ -21,9 +21,9 @@ class Optimizer:
         self._init_state()
 
     def step(self):
-        NotImplementedError("Méthode step non implémentée")
+        raise NotImplementedError("Méthode step non implémentée")
 
     def _init_state(self):
-        NotImplementedError("Méthode _init_state non implémentée")
+        raise NotImplementedError("Méthode _init_state non implémentée")
 
         
