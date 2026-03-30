@@ -6,20 +6,24 @@ class Momentum(Optimizer):
         super().__init__()
         self.lr = learning_rate
         self.mu = momentum
-
         self.momentums = {}
+
+    def setup(self, layers):
+        self.layers = layers
+        params = []
         for layer in self.layers:
-            if hasattr(layer, 'W') and layer.W is not None:
-                self.momentums[layer] = {'W': np.zeros(layer.W.shape), 'b': np.zeros(layer.b.shape)}
-
-
+            params += layer.get_params()
+        self.params = params
+        self.momentums = [] * len(self.params)
+        
     def step(self):
-        for layer in self.layers:
-            if hasattr(layer, 'W') and layer.W is not None:
-                m = self.momentums[layer]
+        if len(self.params) != len(self.grads):
+            raise ValueError(f"Mismatch: Optimizer has {len(self.params)} params "
+                     f"but received {len(self.grads)} gradients.")
+        
+        self.get_grads()
+        
+        for i in range(len(self.params)):
+            self.momentums[i] = self.mu * self.momentums[i] + (1-self.mu) * self.grads[i]
+            self.params[i] -= self.lr * self.momentums[i]
 
-                m['W'] = self.mu * m['W'] + (1-self.mu) * layer.grad_W
-                m['b'] = self.mu * m['b'] + (1-self.mu) * layer.grad_b
-
-                layer.W -= self.lr * m['W']
-                layer.b -= self.lr * m['b']

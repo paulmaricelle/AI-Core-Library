@@ -40,3 +40,13 @@ class Linear(Layer):
             self.grad_b += grad_b_current
 
         return grad_wrt_input
+    
+    def get_params(self):
+        return [self.W, self.b]
+    
+    def get_grads(self):
+        return [self.grad_W, self.grad_b]
+    
+    def zero_grad(self):
+        self.grad_W = None
+        self.grad_b = None
