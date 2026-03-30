@@ -8,13 +8,8 @@ class Momentum(Optimizer):
         self.mu = momentum
         self.momentums = {}
 
-    def setup(self, layers):
-        self.layers = layers
-        params = []
-        for layer in self.layers:
-            params += layer.get_params()
-        self.params = params
-        self.momentums = [] * len(self.params)
+    def _init_state(self):
+        self.momentums = [np.zeros_like(p) for p in self.params]
         
     def step(self):
         if len(self.params) != len(self.grads):

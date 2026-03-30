@@ -4,7 +4,7 @@ class Optimizer:
         self.grads = []
 
     def zero_grad(self):   
-        for layer in self.layer:
+        for layer in self.layers:
             layer.zero_grad()
 
     def get_grads(self):
@@ -13,10 +13,17 @@ class Optimizer:
             grads += layer.get_grads()
         self.grads = grads
 
+    def setup(self, layers):
+        self.layers = layers
+        self.params = []
+        for layer in self.layers:
+            self.params += layer.get_params()
+        self._init_state()
+
     def step(self):
         NotImplementedError("Méthode step non implémentée")
 
-    def setup(self, layers):
-        NotImplementedError("Méthode setup non implémentée")
+    def _init_state(self):
+        NotImplementedError("Méthode _init_state non implémentée")
 
         

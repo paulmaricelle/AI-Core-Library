@@ -3,7 +3,7 @@ import numpy as np
 
 class ReLU(Layer):
     def __init__(self):
-        super().__init___()
+        super().__init__()
         self.mask = None
 
     def forward(self, X):
@@ -22,7 +22,7 @@ class ReLU(Layer):
 
 class Sigmoid(Layer):
     def __init__(self):
-        super().__init___()
+        super().__init__()
         self.output = None
 
     def forward(self, X):
@@ -41,10 +41,11 @@ class Sigmoid(Layer):
 
 class Tanh(Layer):
     def __init__(self):
-        super().__init___()
+        super().__init__()
         self.output = None
 
     def forward(self, X):
+        self.input = X
         self.output = np.tanh(X)
         return self.output
     

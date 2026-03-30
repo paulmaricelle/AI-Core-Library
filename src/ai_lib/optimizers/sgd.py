@@ -5,12 +5,8 @@ class Sgd(Optimizer):
         super().__init__()
         self.lr = learning_rate
 
-    def setup(self, layers):
-        self.layers = layers
-        params = []
-        for layer in self.layers:
-            params += layer.get_params()
-        self.params = params
+    def _init_state(self):
+        pass
 
     def step(self):
         if len(self.params) != len(self.grads):

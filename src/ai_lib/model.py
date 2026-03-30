@@ -9,6 +9,8 @@ class Model:
         y_pred = self.sequential.forward(X)
         loss_val = loss(y_pred, y)
 
+        # Here the gradient is reset at every step, which may
+        # not always be the intended purpose
         optimizer.zero_grad()
         grad = loss.backward()
         self.sequential.backward(grad)
@@ -25,13 +27,13 @@ class Model:
         period = 10**(int(np.log10(epochs)-2))
         for epoch in range(epochs):
             indices = np.random.permutation(n_samples)
-            X = X[:, indices]
-            y = y[:, indices]
+            X_shuffled = X[:, indices]
+            y_shuffled = y[:, indices]
 
             loss_value = 0
             for i in range(0, n_samples, batch_size):
-                x_batch = X[:,  i : i + batch_size]
-                y_batch = y[:, i : i + batch_size]
+                x_batch = X_shuffled[:,  i : i + batch_size]
+                y_batch = y_shuffled[:, i : i + batch_size]
 
                 loss_batch = self.train_step(x_batch, y_batch, loss, optimizer)
                 # If the loss is "non-linear" with respect to the batches,
