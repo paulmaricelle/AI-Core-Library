@@ -16,13 +16,20 @@ class Model:
 
         return loss_val
         
-    def fit(self, X, y, epochs, loss, optimizer, batch_size=1, accumulation_steps=1, verbose=True):
+    def fit(self, X, y, epochs, loss, optimizer, batch_size=1, validation_data = None, patience = 50, accumulation_steps=1, verbose=True):
         optimizer.setup(self.sequential.layers)
         n_samples = X.shape[1]
 
         #Printing period
         period = max(1, 10**(int(np.log10(epochs)-2)))
+        #Early Stopping
+        early_stopping = False
+        if validation_data != None:
+            early_stopping = True
+            wait = 0
+            best_loss = np.inf
 
+        #Actual training
         for epoch in range(epochs):
             indices = np.random.permutation(n_samples)
             X_shuffled = X[:, indices]
@@ -40,9 +47,38 @@ class Model:
                 actual_batch_size = x_batch.shape[1]
                 loss_value += loss_batch * actual_batch_size
 
-            if (i // batch_size + 1) % accumulation_steps == 0:
-                optimizer.step(accumulation_steps)
+                #Handling of accumulation of gradients
+                if (i // batch_size + 1) % accumulation_steps == 0:
+                    optimizer.step(accumulation_steps)
+            
+            num_batches = (n_samples + batch_size - 1) // batch_size
+            if num_batches % accumulation_steps != 0:
+                optimizer.step(num_batches % accumulation_steps)
+                optimizer.zero_grad()
 
+            #Early Stopping again
+            if early_stopping:
+                try:
+                    y_pred = self.sequential.forward(validation_data[0])
+                    validation_loss_value = loss(y_pred, validation_data[1])
+                except:
+                    print("Unvalid validation data")
+
+                if validation_loss_value < best_loss:
+                    best_loss = validation_loss_value
+                    wait = 0
+                else:
+                    wait += 1
+                
+                 
+            mean_loss = loss_value / n_samples
             if verbose and epoch % period == 0:
-                mean_loss = loss_value / n_samples
-                print(f"Iteration {epoch} completed, loss is {mean_loss}")               
+                print(f"Iteration {epoch} completed, loss is {mean_loss}")
+                if early_stopping:
+                    #There is no need to divide by the number of samples as there is only one batch so it is done instantly
+                    print(f"Iteration {epoch} completed, validation loss is {validation_loss_value}")
+
+            if early_stopping and wait >= patience:
+                if verbose:
+                    print("Early Stopping, patience reached")
+                break

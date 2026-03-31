@@ -5,8 +5,8 @@ class Momentum(Optimizer):
     def __init__(self, learning_rate=10e-2, momentum = 0.9):
         super().__init__()
         self.lr = learning_rate
-        self.mu = momentum
-        self.momentums = {}
+        self.beta = momentum
+        self.momentums = []
 
     def _init_state(self):
         self.momentums = [np.zeros_like(p) for p in self.params]
@@ -18,6 +18,6 @@ class Momentum(Optimizer):
                      f"but received {len(self.grads)} gradients.")
         
         for i in range(len(self.params)):
-            self.momentums[i] = self.mu * self.momentums[i] + ((1-self.mu)/accumulation_steps) * self.grads[i]
+            self.momentums[i] = self.beta * self.momentums[i] + ((1-self.beta)/accumulation_steps) * self.grads[i]
             self.params[i] -= self.lr * self.momentums[i]
 
