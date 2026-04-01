@@ -37,7 +37,7 @@ class Model:
 
             loss_value = 0
             self.sequential.set_training(True)
-            
+
             for i in range(0, n_samples, batch_size):
                 if (i // batch_size) % accumulation_steps == 0:
                     optimizer.zero_grad()
@@ -60,12 +60,9 @@ class Model:
 
             #Early Stopping again
             if early_stopping:
-                try:
-                    self.sequential.set_training(False)
-                    y_pred = self.sequential.forward(validation_data[0])
-                    validation_loss_value = loss(y_pred, validation_data[1])
-                except:
-                    print("Unvalid validation data")
+                self.sequential.set_training(False)
+                y_pred = self.sequential.forward(validation_data[0])
+                validation_loss_value = loss(y_pred, validation_data[1])
 
                 if validation_loss_value < best_loss:
                     best_loss = validation_loss_value
@@ -85,3 +82,7 @@ class Model:
                 if verbose:
                     print("Early Stopping, patience reached")
                 break
+
+    def predict(self, X):
+        self.sequential.set_training(False)
+        return self.sequential.forward(X)
