@@ -11,3 +11,7 @@ class Sequential:
         for layer in reversed(self.layers):
             grad = layer.backward(grad)
         return grad
+    
+    def set_training(self, mode):
+        for layer in self.layers:
+            layer.training = mode
