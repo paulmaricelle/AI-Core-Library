@@ -26,11 +26,15 @@ class LayerNormalization(Layer):
         self.grad_gamma = np.sum(grad_wrt_output * self.X_hat, axis=1, keepdims=True)
         self.grad_beta = np.sum(grad_wrt_output, axis=1, keepdims=True)
 
-        batch_size = self.X.shape[1]
         n_features = self.X.shape[0]
 
-        #A finir
-        return 
+        dx_hat = grad_wrt_output * self.gamma
+        da = (1.0 / n_features) * (
+            n_features * dx_hat - 
+            np.sum(dx_hat, axis=0, keepdims=True) - 
+            self.X_hat * np.sum(dx_hat * self.X_hat, axis=0, keepdims=True)
+        )
+        return self.std_inv * da
     
     def get_params(self):
         return [self.gamma, self.beta]
