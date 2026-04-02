@@ -2,12 +2,16 @@ from .layer import Layer
 import numpy as np
 
 class Linear(Layer):
-    def __init__(self, n_input, n_out):
+    def __init__(self, n_input, n_out, init_method = "xavier"):
         super().__init__()
-        #Initialisation uniforme Xavier
-        xavier = np.sqrt(6.0/(n_out+n_input))
-
-        self.W = np.random.uniform(-xavier, xavier, (n_out, n_input))
+        if init_method == "xavier":
+            limit = np.sqrt(6.0 / (n_out + n_input))
+            self.W = np.random.uniform(-limit, limit, (n_out, n_input))
+        elif init_method == "he":
+            std = np.sqrt(2 / n_input)
+            self.W = np.random.randn(n_out, n_input) * std
+        else:
+            self.W = np.random.randn(n_out, n_input) * 10e-2
         self.b = np.zeros((n_out, 1))
 
         self.grad_W = None
