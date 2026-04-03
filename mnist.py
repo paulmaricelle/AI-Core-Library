@@ -21,13 +21,13 @@ X_train, Y_train = load_local_mnist('data/mnist/train-images.idx3-ubyte', 'data/
 X_val, Y_val = load_local_mnist('data/mnist/t10k-images.idx3-ubyte', 'data/mnist/t10k-labels.idx1-ubyte')
 
 network = Sequential([layers.Linear(784, 256, "xavier"), layers.LayerNormalization(256),
-                      layers.ReLU(), layers.Dropout(0.2), layers.Linear(256, 128),
-                      layers.LayerNormalization(128), layers.ReLU(), layers.Dropout(0.2),
-                      layers.Linear(128, 10), layers.InferenceOnlySoftmax()])
+                      layers.ReLU(), layers.Dropout(0.4), layers.Linear(256, 128),
+                      layers.LayerNormalization(128), layers.ReLU(), layers.Dropout(0.4),
+                      layers.Linear(128, 10)])
 
 model = Model(network)
 try:
-    model.fit(X_train, Y_train, 50, losses.SoftmaxCrossEntropy(), optimizers.Adam(learning_rate=0.00005, weight_decay=10e-4), batch_size=32, accumulation_steps=2, validation_data=[X_val, Y_val], early_stopping=True, patience=20, metrics=["accuracy"])
+    model.fit(X_train, Y_train, 50, losses.SoftmaxCrossEntropy(), optimizers.Adam(learning_rate=0.0001, weight_decay=0.01), batch_size=32, accumulation_steps=4, validation_data=[X_val, Y_val], early_stopping=True, patience=20, metrics=["accuracy"])
 except KeyboardInterrupt:
     print("Arrêt manuel détecté.")
 except Exception as e:

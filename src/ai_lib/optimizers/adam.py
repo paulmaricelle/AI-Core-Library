@@ -2,7 +2,7 @@ from .opti import Optimizer
 import numpy as np
 
 class Adam(Optimizer):
-    def __init__(self, learning_rate= 10e-3, beta_1 = 0.9, beta_2 = 0.999, epsilon = 10e-8, weight_decay=0):
+    def __init__(self, learning_rate= 1e-3, beta_1 = 0.9, beta_2 = 0.999, epsilon = 1e-8, weight_decay=0):
         super().__init__()
         self.lr = learning_rate
         self.b1 = beta_1

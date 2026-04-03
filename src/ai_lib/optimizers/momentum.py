@@ -2,7 +2,7 @@ from .opti import Optimizer
 import numpy as np
 
 class Momentum(Optimizer):
-    def __init__(self, learning_rate=10e-2, momentum=0.9, weight_decay=0):
+    def __init__(self, learning_rate=1e-2, momentum=0.9, weight_decay=0):
         super().__init__()
         self.lr = learning_rate
         self.beta = momentum

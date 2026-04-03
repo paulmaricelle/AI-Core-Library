@@ -76,6 +76,11 @@ class Model:
         self.sequential.set_training(False)
         return self.sequential.forward(X)
     
+    def predict_proba(self, X):
+        logits = self.predict(X)
+        exp = np.exp(logits - np.max(logits, axis=0, keepdims=True))
+        return exp / np.sum(exp, axis=0, keepdims=True)
+    
     def compute_metrics(self, X_metric, y_metric, metrics, threshold):
         result = []
         if len(metrics) > 0:

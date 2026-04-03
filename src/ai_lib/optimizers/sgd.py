@@ -1,7 +1,7 @@
 from .opti import Optimizer
 
 class Sgd(Optimizer):
-    def __init__(self, learning_rate=10e-2, weight_decay=0):
+    def __init__(self, learning_rate=1e-2, weight_decay=0):
         super().__init__()
         self.lr = learning_rate
         self.weight_decay = weight_decay
