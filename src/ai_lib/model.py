@@ -89,10 +89,10 @@ class Model:
                 if metric == "mse":
                     result.append(mse(y_pred=y_pred, y_true=y_metric))
                 if metric == "binary":
-                    result.append(binary_metrics(y_pred, y, threshold))
+                    result.append(binary_metrics(y_pred, y_metric, threshold))
         return result
     
-    def log_post_epoch(self, X, y, validation_data, mean_loss, metrics, binary_classification_threshold, epoch, verbose, validation_loss_value):
+    def log_post_epoch(self, X, y, validation_data, mean_loss, metrics, binary_classification_threshold, epoch, verbose, validation_loss_value=None):
         if validation_data != None:
             #Metrics on validation
             result = self.compute_metrics(validation_data[0], validation_data[1], metrics, binary_classification_threshold)

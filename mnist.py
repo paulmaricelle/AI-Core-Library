@@ -27,7 +27,7 @@ network = Sequential([layers.Linear(784, 256, "xavier"), layers.LayerNormalizati
 
 model = Model(network)
 try:
-    model.fit(X_train, Y_train, 50, losses.MSE(), optimizers.Adam(learning_rate=0.00005, weight_decay=10e-4), batch_size=32, accumulation_steps=4, validation_data=[X_val, Y_val], early_stopping=True, patience=20, metrics=["accuracy"])
+    model.fit(X_train, Y_train, 50, losses.SoftmaxCrossEntropy(), optimizers.Adam(learning_rate=0.00005, weight_decay=10e-4), batch_size=32, accumulation_steps=2, validation_data=[X_val, Y_val], early_stopping=True, patience=20, metrics=["accuracy"])
 except KeyboardInterrupt:
     print("Arrêt manuel détecté.")
 except Exception as e:
