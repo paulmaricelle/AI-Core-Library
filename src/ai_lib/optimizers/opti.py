@@ -19,7 +19,7 @@ class Optimizer:
         self.to_reg = []
         for layer in self.layers:
             self.params += layer.get_params()
-            self.to_reg += layer.get_bias_info()
+            self.to_reg += layer.get_reg_info()
         self._init_state()
 
     def step(self, accumulation_steps):

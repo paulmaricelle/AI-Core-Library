@@ -45,7 +45,7 @@ class Model:
                 x_batch = X_shuffled[:,  i : i + batch_size]
                 y_batch = y_shuffled[:, i : i + batch_size]
 
-                loss_batch = self.train_step(x_batch, y_batch, loss, optimizer)
+                loss_batch = self.train_step(x_batch, y_batch, loss)
                 actual_batch_size = x_batch.shape[1]
                 loss_value += loss_batch * actual_batch_size
 
@@ -59,11 +59,11 @@ class Model:
                 optimizer.step(num_batches % accumulation_steps)
                 optimizer.zero_grad()
 
-            #Early Stopping again
+            validation_loss_value = self.get_validation_loss(validation_data, loss=loss)
             if early_stopping:
-                best_loss, wait, validation_loss_value = self.update_wait(validation_data, best_loss, loss, wait)
-            
-            self.log_post_epoch(self, X, y, validation_data, mean_loss, metrics, binary_classification_threshold, epoch, verbose, period, early_stopping, validation_loss_value)
+                best_loss, wait = self.update_wait(validation_loss_value, best_loss, wait)
+
+            self.log_post_epoch(X, y, validation_data, mean_loss, metrics, binary_classification_threshold, epoch, verbose, period, early_stopping, validation_loss_value)
 
             if early_stopping and wait >= patience:
                 if verbose:
@@ -75,9 +75,9 @@ class Model:
         return self.sequential.forward(X)
     
     def compute_metrics(self, X, y, metrics, threshold):
+        result = []
         if len(metrics) > 0:
             y_pred = self.predict(X)
-            result = []
 
             for metric in metrics:
                 if metric == "accuracy":
@@ -95,12 +95,12 @@ class Model:
             #Metrics on validation
             result = self.compute_metrics(validation_data[0], validation_data[1], metrics, binary_classification_threshold)
             for i in range(len(metrics)):
-                print(metrics[i]+" on validation set is "+result[i])
+                print(f"{metrics[i]} on validation set is {result[i]}")
 
         #Metrics on training set
         result = self.compute_metrics(X, y, metrics, binary_classification_threshold)
         for i in range(len(metrics)):
-            print(metrics[i]+" on training set is "+result[i])
+            print(f"{metrics[i]} on validation set is {result[i]}")
                 
         if verbose and epoch % period == 0:
             print(f"Iteration {epoch} completed, loss is {mean_loss}")
@@ -108,14 +108,15 @@ class Model:
                 #There is no need to divide by the number of samples as there is only one batch so it is done instantly
                 print(f"Iteration {epoch} completed, validation loss is {validation_loss_value}")
 
-def update_wait(self, validation_data, best_loss, loss, wait):
-    self.sequential.set_training(False)
-    y_pred = self.sequential.forward(validation_data[0])
-    validation_loss_value = loss(y_pred, validation_data[1])
-
-    if validation_loss_value < best_loss:
-        best_loss = validation_loss_value
-        wait = 0
-    else:
-        wait += 1
-    return best_loss, wait, validation_loss_value
+    def get_validation_loss(self, validation_data, loss):
+        self.sequential.set_training(False)
+        y_pred = self.sequential.forward(validation_data[0])
+        return loss(y_pred, validation_data[1])
+    
+    def update_wait(self, validation_loss_value, best_loss, wait):     
+        if validation_loss_value < best_loss:
+            best_loss = validation_loss_value
+            wait = 0
+        else:
+            wait += 1
+        return best_loss, wait
