@@ -17,16 +17,15 @@ class Model:
 
         return loss_val
         
-    def fit(self, X, y, epochs, loss, optimizer, batch_size=1, validation_data = None, patience = 50, accumulation_steps=1, metrics = [], binary_classification_threshold = 0.5, verbose=True):
+    def fit(self, X, y, epochs, loss, optimizer, batch_size=1, validation_data = None, early_stopping=False, patience = 50, accumulation_steps=1, metrics = [], binary_classification_threshold = 0.5, verbose=True):
         optimizer.setup(self.sequential.layers)
         n_samples = X.shape[1]
 
         #Printing period
         period = max(1, 10**(int(np.log10(epochs)-2)))
         #Early Stopping
-        early_stopping = False
-        if validation_data != None:
-            early_stopping = True
+        early_stopping = early_stopping and (validation_data != None)
+        if early_stopping:
             wait = 0
             best_loss = np.inf
 
@@ -53,6 +52,7 @@ class Model:
                 #Handling of accumulation of gradients
                 if (i // batch_size + 1) % accumulation_steps == 0:
                     optimizer.step(accumulation_steps)
+            mean_loss = loss_value / n_samples
             
             num_batches = (n_samples + batch_size - 1) // batch_size
             if num_batches % accumulation_steps != 0:
@@ -61,32 +61,9 @@ class Model:
 
             #Early Stopping again
             if early_stopping:
-                self.sequential.set_training(False)
-                y_pred = self.sequential.forward(validation_data[0])
-                validation_loss_value = loss(y_pred, validation_data[1])
-
-                if validation_loss_value < best_loss:
-                    best_loss = validation_loss_value
-                    wait = 0
-                else:
-                    wait += 1
-
-                #Metrics on validation
-                result = self.compute_metrics(validation_data[0], validation_data[1], metrics, binary_classification_threshold)
-                for i in range(len(metrics)):
-                    print(metrics[i]+" on validation set is "+result[i])
-
-            #Metrics on training set
-            result = self.compute_metrics(X, y, metrics, binary_classification_threshold)
-            for i in range(len(metrics)):
-                print(metrics[i]+" on training set is "+result[i])
-                 
-            mean_loss = loss_value / n_samples
-            if verbose and epoch % period == 0:
-                print(f"Iteration {epoch} completed, loss is {mean_loss}")
-                if early_stopping:
-                    #There is no need to divide by the number of samples as there is only one batch so it is done instantly
-                    print(f"Iteration {epoch} completed, validation loss is {validation_loss_value}")
+                best_loss, wait, validation_loss_value = self.update_wait(validation_data, best_loss, loss, wait)
+            
+            self.log_post_epoch(self, X, y, validation_data, mean_loss, metrics, binary_classification_threshold, epoch, verbose, period, early_stopping, validation_loss_value)
 
             if early_stopping and wait >= patience:
                 if verbose:
@@ -112,3 +89,33 @@ class Model:
                 if metric == "binary":
                     result.append(binary_metrics(y_pred, y, threshold))
         return result
+    
+    def log_post_epoch(self, X, y, validation_data, mean_loss, metrics, binary_classification_threshold, epoch, verbose, period, early_stopping, validation_loss_value):
+        if validation_data != None:
+            #Metrics on validation
+            result = self.compute_metrics(validation_data[0], validation_data[1], metrics, binary_classification_threshold)
+            for i in range(len(metrics)):
+                print(metrics[i]+" on validation set is "+result[i])
+
+        #Metrics on training set
+        result = self.compute_metrics(X, y, metrics, binary_classification_threshold)
+        for i in range(len(metrics)):
+            print(metrics[i]+" on training set is "+result[i])
+                
+        if verbose and epoch % period == 0:
+            print(f"Iteration {epoch} completed, loss is {mean_loss}")
+            if validation_data != None:
+                #There is no need to divide by the number of samples as there is only one batch so it is done instantly
+                print(f"Iteration {epoch} completed, validation loss is {validation_loss_value}")
+
+def update_wait(self, validation_data, best_loss, loss, wait):
+    self.sequential.set_training(False)
+    y_pred = self.sequential.forward(validation_data[0])
+    validation_loss_value = loss(y_pred, validation_data[1])
+
+    if validation_loss_value < best_loss:
+        best_loss = validation_loss_value
+        wait = 0
+    else:
+        wait += 1
+    return best_loss, wait, validation_loss_value
