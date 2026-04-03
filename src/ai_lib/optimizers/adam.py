@@ -2,12 +2,13 @@ from .opti import Optimizer
 import numpy as np
 
 class Adam(Optimizer):
-    def __init__(self, learning_rate= 10e-3, beta_1 = 0.9, beta_2 = 0.999, epsilon = 10e-8):
+    def __init__(self, learning_rate= 10e-3, beta_1 = 0.9, beta_2 = 0.999, epsilon = 10e-8, weight_decay=0):
         super().__init__()
         self.lr = learning_rate
         self.b1 = beta_1
         self.b2 = beta_2 
         self.epsilon = epsilon
+        self.weight_decay = weight_decay
         self.m = []
         self.v = []
         self.t = 1
@@ -24,12 +25,13 @@ class Adam(Optimizer):
         
         for i in range(len(self.params)):
             grads_average = self.grads[i] / accumulation_steps
+
             self.m[i] = self.b1 * self.m[i] + (1 - self.b1) * grads_average
             self.v[i] = self.b2 * self.v[i] + (1 - self.b2) * (grads_average ** 2)
             
             m_hat = self.m[i] / (1 - self.b1 ** self.t)
             v_hat = self.v[i] / (1 - self.b2 ** self.t)
             
-            self.params[i] -= self.lr * m_hat / (np.sqrt(v_hat) + self.epsilon)
+            self.params[i] -= self.lr * ((m_hat / (np.sqrt(v_hat) + self.epsilon)) + self.weight_decay * (self.params[i] if self.to_reg[i] == True else 0))
 
         self.t += 1

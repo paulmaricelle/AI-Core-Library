@@ -2,10 +2,11 @@ from .opti import Optimizer
 import numpy as np
 
 class Momentum(Optimizer):
-    def __init__(self, learning_rate=10e-2, momentum = 0.9):
+    def __init__(self, learning_rate=10e-2, momentum=0.9, weight_decay=0):
         super().__init__()
         self.lr = learning_rate
         self.beta = momentum
+        self.weight_decay = weight_decay
         self.momentums = []
 
     def _init_state(self):
@@ -19,5 +20,5 @@ class Momentum(Optimizer):
         
         for i in range(len(self.params)):
             self.momentums[i] = self.beta * self.momentums[i] + ((1-self.beta)/accumulation_steps) * self.grads[i]
-            self.params[i] -= self.lr * self.momentums[i]
+            self.params[i] -= self.lr * (self.momentums[i] + self.weight_decay * (self.params[i] if self.to_reg[i] == True else 0))
 

@@ -1,9 +1,10 @@
 from .opti import Optimizer
 
 class Sgd(Optimizer):
-    def __init__(self, learning_rate=10e-2):
+    def __init__(self, learning_rate=10e-2, weight_decay=0):
         super().__init__()
         self.lr = learning_rate
+        self.weight_decay = weight_decay
 
     def _init_state(self):
         pass
@@ -15,4 +16,4 @@ class Sgd(Optimizer):
                      f"but received {len(self.grads)} gradients.")
 
         for i in range(len(self.params)):
-            self.params[i] -= self.lr * self.grads[i] / accumulation_steps
+            self.params[i] -= self.lr * (self.grads[i] / accumulation_steps + self.weight_decay * (self.params[i] if self.to_reg[i] == True else 0))

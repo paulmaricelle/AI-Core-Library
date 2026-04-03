@@ -51,6 +51,9 @@ class Linear(Layer):
     def get_grads(self):
         return [self.grad_W, self.grad_b]
     
+    def get_reg_info(self):
+        return [True, False]
+    
     def zero_grad(self):
         self.grad_W = None
         self.grad_b = None

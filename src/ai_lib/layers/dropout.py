@@ -22,6 +22,9 @@ class Dropout(Layer):
     def get_params(self):
         return []
     
+    def get_reg_info(self):
+        return []
+    
     def get_grads(self):
         return []
     

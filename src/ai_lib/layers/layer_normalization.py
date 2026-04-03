@@ -39,6 +39,9 @@ class LayerNormalization(Layer):
     def get_params(self):
         return [self.gamma, self.beta]
     
+    def get_reg_info(self):
+        return [False, False]
+    
     def get_grads(self):
         return [self.grad_gamma, self.grad_beta]
     
