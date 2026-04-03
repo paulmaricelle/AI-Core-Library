@@ -10,12 +10,10 @@ class Model:
         y_pred = self.sequential.forward(X)
         loss_val = loss(y_pred, y)
 
-        # Here the gradient is reset at every step, which may
-        # not always be the intended purpose
         grad = loss.backward()
         self.sequential.backward(grad)
 
-        return loss_val
+        return loss_val, y_pred
         
     def fit(self, X, y, epochs, loss, optimizer, batch_size=1, validation_data = None, early_stopping=False, patience = 50, accumulation_steps=1, metrics = [], binary_classification_threshold = 0.5, verbose=True):
         optimizer.setup(self.sequential.layers)
@@ -37,6 +35,7 @@ class Model:
 
             loss_value = 0
             self.sequential.set_training(True)
+            epoch_metrics = np.zeros((len(metrics),))
 
             for i in range(0, n_samples, batch_size):
                 if (i // batch_size) % accumulation_steps == 0:
@@ -45,14 +44,20 @@ class Model:
                 x_batch = X_shuffled[:,  i : i + batch_size]
                 y_batch = y_shuffled[:, i : i + batch_size]
 
-                loss_batch = self.train_step(x_batch, y_batch, loss)
+                loss_batch, y_pred = self.train_step(x_batch, y_batch, loss)
                 actual_batch_size = x_batch.shape[1]
                 loss_value += loss_batch * actual_batch_size
 
                 #Handling of accumulation of gradients
                 if (i // batch_size + 1) % accumulation_steps == 0:
                     optimizer.step(accumulation_steps)
+
+                for i, metric_fn in enumerate(metrics):
+                    batch_metric = metric_fn(y_pred, y_batch)
+                    epoch_metrics[i] += batch_metric * actual_batch_size
+
             mean_loss = loss_value / n_samples
+            epoch_metrics = epoch_metrics / n_samples
             
             num_batches = (n_samples + batch_size - 1) // batch_size
             if num_batches % accumulation_steps != 0:
@@ -65,7 +70,7 @@ class Model:
                 best_loss, wait = self.update_wait(validation_loss_value, best_loss, wait)
 
             if epoch % period == 0:
-                self.log_post_epoch(X, y, validation_data, mean_loss, metrics, binary_classification_threshold, epoch, verbose, validation_loss_value)
+                self.log_post_epoch(epoch_metrics, validation_data, mean_loss, metrics, binary_classification_threshold, epoch, verbose, validation_loss_value)
 
             if early_stopping and wait >= patience:
                 if verbose:
@@ -81,33 +86,31 @@ class Model:
         exp = np.exp(logits - np.max(logits, axis=0, keepdims=True))
         return exp / np.sum(exp, axis=0, keepdims=True)
     
-    def compute_metrics(self, X_metric, y_metric, metrics, threshold):
-        result = []
-        if len(metrics) > 0:
-            y_pred = self.predict(X_metric)
+    def compute_metrics(self, X, y, metrics, threshold, batch_size=32):
+        n_samples = X.shape[1]
+        metrics = np.zeros((len(metrics),))
+        for i in range(0, n_samples, batch_size):
+            X_batch = X[:, i : i + batch_size]
+            y_batch = y[:, i : i + batch_size]
 
-            for metric in metrics:
-                if metric == "accuracy":
-                    result.append(accuracy(y_pred=y_pred, y_true=y_metric))
-                if metric == "mae":
-                    result.append(mae(y_pred=y_pred, y_true=y_metric))
-                if metric == "mse":
-                    result.append(mse(y_pred=y_pred, y_true=y_metric))
-                if metric == "binary":
-                    result.append(binary_metrics(y_pred, y_metric, threshold))
-        return result
+            y_pred = self.sequential.forward(X_batch)
+            actual_batch_size = X_batch.shape[1]
+
+            for i, metric_fn in enumerate(metrics):
+                metrics[i] += metric_fn(y_pred, y_batch, threshold) * actual_batch_size
+        
+        return metrics / n_samples
     
-    def log_post_epoch(self, X, y, validation_data, mean_loss, metrics, binary_classification_threshold, epoch, verbose, validation_loss_value=None):
+    def log_post_epoch(self, epoch_metrics, validation_data, mean_loss, metrics, binary_classification_threshold, epoch, verbose, validation_loss_value=None):
         if validation_data != None:
             #Metrics on validation
-            result = self.compute_metrics(validation_data[0], validation_data[1], metrics, binary_classification_threshold)
+            val_epoch_metrics = self.compute_metrics(validation_data[0], validation_data[1], metrics, binary_classification_threshold, batch_size=32)
             for i in range(len(metrics)):
-                print(f"{metrics[i]} on validation set is {result[i]}")
+                print(f"{metrics[i].__name__} on validation set is {val_epoch_metrics[i]}")
 
         #Metrics on training set
-        result = self.compute_metrics(X, y, metrics, binary_classification_threshold)
         for i in range(len(metrics)):
-            print(f"{metrics[i]} on training set is {result[i]}")
+            print(f"{metrics[i].__name__} on training set is {epoch_metrics[i]}")
                 
         if verbose:
             print(f"Iteration {epoch} completed, loss is {mean_loss}")

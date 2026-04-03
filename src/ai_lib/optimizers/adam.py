@@ -16,6 +16,7 @@ class Adam(Optimizer):
     def _init_state(self):
         self.m = [np.zeros_like(p) for p in self.params]
         self.v = [np.zeros_like(p) for p in self.params]
+        self.t = 1
         
     def step(self, accumulation_steps):
         self.get_grads()
