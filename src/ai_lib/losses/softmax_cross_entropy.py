@@ -9,6 +9,7 @@ class SoftmaxCrossEntropy(Loss):
 
         exp = np.exp(X - np.max(X, axis=0, keepdims=True))
         softmax = exp/np.sum(exp, axis=0, keepdims=True )
+        self.y_pred = softmax
 
         batch_size = X.shape[1]
         log_prob = -np.log(softmax + 1e-15)

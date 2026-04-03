@@ -26,7 +26,7 @@ class LayerNormalization(Layer):
         self.grad_gamma = np.sum(grad_wrt_output * self.X_hat, axis=1, keepdims=True)
         self.grad_beta = np.sum(grad_wrt_output, axis=1, keepdims=True)
 
-        n_features = self.X.shape[0]
+        n_features = self.n_features
 
         dx_hat = grad_wrt_output * self.gamma
         da = (1.0 / n_features) * (

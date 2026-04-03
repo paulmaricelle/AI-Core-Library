@@ -59,7 +59,8 @@ class Model:
                 optimizer.step(num_batches % accumulation_steps)
                 optimizer.zero_grad()
 
-            validation_loss_value = self.get_validation_loss(validation_data, loss=loss)
+            if validation_data != None:
+                validation_loss_value = self.get_validation_loss(validation_data, loss=loss)
             if early_stopping:
                 best_loss, wait = self.update_wait(validation_loss_value, best_loss, wait)
 
@@ -75,18 +76,18 @@ class Model:
         self.sequential.set_training(False)
         return self.sequential.forward(X)
     
-    def compute_metrics(self, X, y, metrics, threshold):
+    def compute_metrics(self, X_metric, y_metric, metrics, threshold):
         result = []
         if len(metrics) > 0:
-            y_pred = self.predict(X)
+            y_pred = self.predict(X_metric)
 
             for metric in metrics:
                 if metric == "accuracy":
-                    result.append(accuracy(y_pred=y_pred, y_true=y))
+                    result.append(accuracy(y_pred=y_pred, y_true=y_metric))
                 if metric == "mae":
-                    result.append(mae(y_pred=y_pred, y_true=y))
+                    result.append(mae(y_pred=y_pred, y_true=y_metric))
                 if metric == "mse":
-                    result.append(mse(y_pred=y_pred, y_true=y))
+                    result.append(mse(y_pred=y_pred, y_true=y_metric))
                 if metric == "binary":
                     result.append(binary_metrics(y_pred, y, threshold))
         return result
@@ -101,7 +102,7 @@ class Model:
         #Metrics on training set
         result = self.compute_metrics(X, y, metrics, binary_classification_threshold)
         for i in range(len(metrics)):
-            print(f"{metrics[i]} on validation set is {result[i]}")
+            print(f"{metrics[i]} on training set is {result[i]}")
                 
         if verbose:
             print(f"Iteration {epoch} completed, loss is {mean_loss}")
