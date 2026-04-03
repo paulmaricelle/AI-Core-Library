@@ -3,6 +3,7 @@ from src.ai_lib import layers
 from src.ai_lib import Sequential, Model
 from src.ai_lib import losses
 from src.ai_lib import optimizers
+from src.ai_lib import metrics
 
 def load_local_mnist(images_path, labels_path):
     with open(images_path, 'rb') as f:
@@ -27,7 +28,7 @@ network = Sequential([layers.Linear(784, 256, "xavier"), layers.LayerNormalizati
 
 model = Model(network)
 try:
-    model.fit(X_train, Y_train, 50, losses.SoftmaxCrossEntropy(), optimizers.Adam(learning_rate=0.0001, weight_decay=0.01), batch_size=32, accumulation_steps=4, validation_data=[X_val, Y_val], early_stopping=True, patience=20, metrics=["accuracy"])
+    model.fit(X_train, Y_train, 50, losses.SoftmaxCrossEntropy(), optimizers.Adam(learning_rate=0.0001, weight_decay=0.01), batch_size=32, accumulation_steps=4, validation_data=[X_val, Y_val], early_stopping=True, patience=20, metrics=[metrics.accuracy])
 except KeyboardInterrupt:
     print("Arrêt manuel détecté.")
 except Exception as e:

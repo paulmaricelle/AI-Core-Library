@@ -53,7 +53,7 @@ class Model:
                     optimizer.step(accumulation_steps)
 
                 for i, metric_fn in enumerate(metrics):
-                    batch_metric = metric_fn(y_pred, y_batch)
+                    batch_metric = metric_fn(y_pred, y_batch, binary_classification_threshold)
                     epoch_metrics[i] += batch_metric * actual_batch_size
 
             mean_loss = loss_value / n_samples
@@ -88,7 +88,7 @@ class Model:
     
     def compute_metrics(self, X, y, metrics, threshold, batch_size=32):
         n_samples = X.shape[1]
-        metrics = np.zeros((len(metrics),))
+        val_metrics = np.zeros((len(metrics),))
         for i in range(0, n_samples, batch_size):
             X_batch = X[:, i : i + batch_size]
             y_batch = y[:, i : i + batch_size]
@@ -97,20 +97,20 @@ class Model:
             actual_batch_size = X_batch.shape[1]
 
             for i, metric_fn in enumerate(metrics):
-                metrics[i] += metric_fn(y_pred, y_batch, threshold) * actual_batch_size
+                val_metrics[i] += metric_fn(y_pred, y_batch, threshold) * actual_batch_size
         
-        return metrics / n_samples
+        return val_metrics / n_samples
     
     def log_post_epoch(self, epoch_metrics, validation_data, mean_loss, metrics, binary_classification_threshold, epoch, verbose, validation_loss_value=None):
         if validation_data != None:
             #Metrics on validation
             val_epoch_metrics = self.compute_metrics(validation_data[0], validation_data[1], metrics, binary_classification_threshold, batch_size=32)
             for i in range(len(metrics)):
-                print(f"{metrics[i].__name__} on validation set is {val_epoch_metrics[i]}")
+                print(f"{metrics[i].__name__} on validation set is {round(val_epoch_metrics[i], 5)}")
 
         #Metrics on training set
         for i in range(len(metrics)):
-            print(f"{metrics[i].__name__} on training set is {epoch_metrics[i]}")
+            print(f"{metrics[i].__name__} on training set is {round(epoch_metrics[i], 5)}")
                 
         if verbose:
             print(f"Iteration {epoch} completed, loss is {mean_loss}")
