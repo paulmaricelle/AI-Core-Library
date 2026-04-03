@@ -63,7 +63,8 @@ class Model:
             if early_stopping:
                 best_loss, wait = self.update_wait(validation_loss_value, best_loss, wait)
 
-            self.log_post_epoch(X, y, validation_data, mean_loss, metrics, binary_classification_threshold, epoch, verbose, period, early_stopping, validation_loss_value)
+            if epoch % period == 0:
+                self.log_post_epoch(X, y, validation_data, mean_loss, metrics, binary_classification_threshold, epoch, verbose, validation_loss_value)
 
             if early_stopping and wait >= patience:
                 if verbose:
@@ -90,7 +91,7 @@ class Model:
                     result.append(binary_metrics(y_pred, y, threshold))
         return result
     
-    def log_post_epoch(self, X, y, validation_data, mean_loss, metrics, binary_classification_threshold, epoch, verbose, period, early_stopping, validation_loss_value):
+    def log_post_epoch(self, X, y, validation_data, mean_loss, metrics, binary_classification_threshold, epoch, verbose, validation_loss_value):
         if validation_data != None:
             #Metrics on validation
             result = self.compute_metrics(validation_data[0], validation_data[1], metrics, binary_classification_threshold)
@@ -102,7 +103,7 @@ class Model:
         for i in range(len(metrics)):
             print(f"{metrics[i]} on validation set is {result[i]}")
                 
-        if verbose and epoch % period == 0:
+        if verbose:
             print(f"Iteration {epoch} completed, loss is {mean_loss}")
             if validation_data != None:
                 #There is no need to divide by the number of samples as there is only one batch so it is done instantly

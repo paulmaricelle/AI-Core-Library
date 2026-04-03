@@ -65,3 +65,33 @@ class Tanh(Layer):
         
     def get_grads(self):
         return []
+    
+
+class InferenceOnlySoftmax(Layer):
+    # I already created a SoftmaCrossEntropy loss which does
+    # not have a "is_training" attribute, therefore, I had a problem
+    # when calulating metrics and performing early_stopping
+    # Therefore I though of adding this layer being the identity during 
+    # training and a softmax during inference
+    def __init__(self):
+        super().__init__()
+    
+    def forward(self, X):
+        if self.training:
+            return X
+        else:
+            exp = np.exp(X - np.max(X, axis=0, keepdims=True))
+            return exp/np.sum(exp, axis=0, keepdims=True)
+
+    def backward(self, grad_wrt_output):
+        # Backward n'est appelé que durant l'entraînement quand la loss est là
+        return grad_wrt_output
+    
+    def get_params(self):
+        return []
+
+    def get_reg_info(self):
+        return []
+        
+    def get_grads(self):
+        return []
