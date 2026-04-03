@@ -1,5 +1,5 @@
 import numpy as np
-from .metrics import accuracy
+from .metrics import accuracy, mae, mse, binary_metrics
 
 class Model:
     def __init__(self, sequential):
@@ -17,7 +17,7 @@ class Model:
 
         return loss_val
         
-    def fit(self, X, y, epochs, loss, optimizer, batch_size=1, validation_data = None, patience = 50, accumulation_steps=1, metrics = [], verbose=True):
+    def fit(self, X, y, epochs, loss, optimizer, batch_size=1, validation_data = None, patience = 50, accumulation_steps=1, metrics = [], binary_classification_threshold = 0.5, verbose=True):
         optimizer.setup(self.sequential.layers)
         n_samples = X.shape[1]
 
@@ -70,7 +70,16 @@ class Model:
                     wait = 0
                 else:
                     wait += 1
-                
+
+                #Metrics on validation
+                result = self.compute_metrics(validation_data[0], validation_data[1], metrics, binary_classification_threshold)
+                for i in range(len(metrics)):
+                    print(metrics[i]+" on validation set is "+result[i])
+
+            #Metrics on training set
+            result = self.compute_metrics(X, y, metrics, binary_classification_threshold)
+            for i in range(len(metrics)):
+                print(metrics[i]+" on training set is "+result[i])
                  
             mean_loss = loss_value / n_samples
             if verbose and epoch % period == 0:
@@ -88,7 +97,7 @@ class Model:
         self.sequential.set_training(False)
         return self.sequential.forward(X)
     
-    def compute_metrics(self, X, y, metrics):
+    def compute_metrics(self, X, y, metrics, threshold):
         if len(metrics) > 0:
             y_pred = self.predict(X)
             result = []
@@ -96,5 +105,10 @@ class Model:
             for metric in metrics:
                 if metric == "accuracy":
                     result.append(accuracy(y_pred=y_pred, y_true=y))
-        
+                if metric == "mae":
+                    result.append(mae(y_pred=y_pred, y_true=y))
+                if metric == "mse":
+                    result.append(mse(y_pred=y_pred, y_true=y))
+                if metric == "binary":
+                    result.append(binary_metrics(y_pred, y, threshold))
         return result
