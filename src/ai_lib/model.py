@@ -1,11 +1,12 @@
 import numpy as np
+from .metrics import accuracy
 
 class Model:
     def __init__(self, sequential):
         self.sequential = sequential
 
 
-    def train_step(self, X, y, loss, optimizer):
+    def train_step(self, X, y, loss):
         y_pred = self.sequential.forward(X)
         loss_val = loss(y_pred, y)
 
@@ -16,7 +17,7 @@ class Model:
 
         return loss_val
         
-    def fit(self, X, y, epochs, loss, optimizer, batch_size=1, validation_data = None, patience = 50, accumulation_steps=1, verbose=True):
+    def fit(self, X, y, epochs, loss, optimizer, batch_size=1, validation_data = None, patience = 50, accumulation_steps=1, metrics = [], verbose=True):
         optimizer.setup(self.sequential.layers)
         n_samples = X.shape[1]
 
@@ -86,3 +87,14 @@ class Model:
     def predict(self, X):
         self.sequential.set_training(False)
         return self.sequential.forward(X)
+    
+    def compute_metrics(self, X, y, metrics):
+        if len(metrics) > 0:
+            y_pred = self.predict(X)
+            result = []
+
+            for metric in metrics:
+                if metric == "accuracy":
+                    result.append(accuracy(y_pred=y_pred, y_true=y))
+        
+        return result
