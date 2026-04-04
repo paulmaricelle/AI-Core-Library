@@ -14,5 +14,8 @@ class Layer:
     def get_params(self):
         raise NotImplementedError("L'obtention des paramètres n'est pas implémentée")
     
+    def get_reg_info(self):
+        raise NotImplementedError("L'obtention des paramètres à régulariser n'est pas implémentée")
+    
     def get_grads(self):
         raise NotImplementedError("L'obtention des gradients n'est pas implémentée")

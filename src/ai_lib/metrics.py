@@ -3,8 +3,8 @@ import numpy as np
 # Some metrics need the classification threshold therefore it is everywhere
 # as an argument to ease the computation of metrics
 def accuracy(y_pred, y_true, threshold):
-    preds = np.argmax(y_pred, axis=0)
-    truth = np.argmax(y_true, axis=0)
+    preds = np.argmax(y_pred, axis=1)
+    truth = np.argmax(y_true, axis=1)
     return round(np.mean(preds==truth), 5)
 
 def recall(y_pred, y_true, threshold=0.5):

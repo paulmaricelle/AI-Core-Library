@@ -18,7 +18,7 @@ class Model:
         
     def fit(self, X, y, epochs, loss, optimizer, batch_size=1, validation_data = None, early_stopping=False, patience = 50, accumulation_steps=1, metrics = [], binary_classification_threshold = 0.5, verbose=True):
         optimizer.setup(self.sequential.layers)
-        n_samples = X.shape[1]
+        n_samples = X.shape[0]
 
         #Printing period
         period = max(1, 10**(int(np.log10(epochs)-2)))
@@ -41,7 +41,7 @@ class Model:
                     optimizer.zero_grad()
 
                 loss_batch, y_pred = self.train_step(x_batch, y_batch, loss)
-                actual_batch_size = x_batch.shape[1]
+                actual_batch_size = x_batch.shape[0]
                 loss_value += loss_batch * actual_batch_size
 
                 #Handling of accumulation of gradients
@@ -79,15 +79,15 @@ class Model:
     
     def predict_proba(self, X):
         logits = self.predict(X)
-        exp = np.exp(logits - np.max(logits, axis=0, keepdims=True))
-        return exp / np.sum(exp, axis=0, keepdims=True)
+        exp = np.exp(logits - np.max(logits, axis=1, keepdims=True))
+        return exp / np.sum(exp, axis=1, keepdims=True)
     
     def compute_metrics(self, X, y, metrics, threshold, batch_size=32):
         dataLoader = DataLoader(X, y, batch_size=batch_size, shuffle=False)
         val_metrics = np.zeros((len(metrics),))
         for X_batch, y_batch in dataLoader:
             y_pred = self.sequential.forward(X_batch)
-            actual_batch_size = X_batch.shape[1]
+            actual_batch_size = X_batch.shape[0]
 
             for j, metric_fn in enumerate(metrics):
                 val_metrics[j] += metric_fn(y_pred, y_batch, threshold) * actual_batch_size
