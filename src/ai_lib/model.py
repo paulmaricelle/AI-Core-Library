@@ -1,5 +1,6 @@
 import numpy as np
 from .metrics import accuracy, mae, mse, binary_metrics
+from .dataLoader import DataLoader
 
 class Model:
     def __init__(self, sequential):
@@ -29,20 +30,15 @@ class Model:
 
         #Actual training
         for epoch in range(epochs):
-            indices = np.random.permutation(n_samples)
-            X_shuffled = X[:, indices]
-            y_shuffled = y[:, indices]
+            dataLoader = DataLoader(X, y, batch_size=batch_size, shuffle=True)
 
             loss_value = 0
             self.sequential.set_training(True)
             epoch_metrics = np.zeros((len(metrics),))
 
-            for i in range(0, n_samples, batch_size):
+            for i, x_batch, y_batch in enumerate(dataLoader):
                 if (i // batch_size) % accumulation_steps == 0:
                     optimizer.zero_grad()
-
-                x_batch = X_shuffled[:,  i : i + batch_size]
-                y_batch = y_shuffled[:, i : i + batch_size]
 
                 loss_batch, y_pred = self.train_step(x_batch, y_batch, loss)
                 actual_batch_size = x_batch.shape[1]
@@ -87,19 +83,16 @@ class Model:
         return exp / np.sum(exp, axis=0, keepdims=True)
     
     def compute_metrics(self, X, y, metrics, threshold, batch_size=32):
-        n_samples = X.shape[1]
+        dataLoader = DataLoader(X, y, batch_size=batch_size, shuffle=False)
         val_metrics = np.zeros((len(metrics),))
-        for i in range(0, n_samples, batch_size):
-            X_batch = X[:, i : i + batch_size]
-            y_batch = y[:, i : i + batch_size]
-
+        for X_batch, y_batch in dataLoader:
             y_pred = self.sequential.forward(X_batch)
             actual_batch_size = X_batch.shape[1]
 
-            for i, metric_fn in enumerate(metrics):
-                val_metrics[i] += metric_fn(y_pred, y_batch, threshold) * actual_batch_size
+            for j, metric_fn in enumerate(metrics):
+                val_metrics[j] += metric_fn(y_pred, y_batch, threshold) * actual_batch_size
         
-        return val_metrics / n_samples
+        return val_metrics / dataLoader.n_samples
     
     def log_post_epoch(self, epoch_metrics, validation_data, mean_loss, metrics, binary_classification_threshold, epoch, verbose, validation_loss_value=None):
         if validation_data != None:
