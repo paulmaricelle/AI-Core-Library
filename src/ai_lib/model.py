@@ -36,8 +36,8 @@ class Model:
             self.sequential.set_training(True)
             epoch_metrics = np.zeros((len(metrics),))
 
-            for i, x_batch, y_batch in enumerate(dataLoader):
-                if (i // batch_size) % accumulation_steps == 0:
+            for i, (x_batch, y_batch) in enumerate(dataLoader):
+                if i % accumulation_steps == 0:
                     optimizer.zero_grad()
 
                 loss_batch, y_pred = self.train_step(x_batch, y_batch, loss)
@@ -45,12 +45,12 @@ class Model:
                 loss_value += loss_batch * actual_batch_size
 
                 #Handling of accumulation of gradients
-                if (i // batch_size + 1) % accumulation_steps == 0:
+                if i % accumulation_steps == accumulation_steps - 1:
                     optimizer.step(accumulation_steps)
 
-                for i, metric_fn in enumerate(metrics):
+                for j, metric_fn in enumerate(metrics):
                     batch_metric = metric_fn(y_pred, y_batch, binary_classification_threshold)
-                    epoch_metrics[i] += batch_metric * actual_batch_size
+                    epoch_metrics[j] += batch_metric * actual_batch_size
 
             mean_loss = loss_value / n_samples
             epoch_metrics = epoch_metrics / n_samples
