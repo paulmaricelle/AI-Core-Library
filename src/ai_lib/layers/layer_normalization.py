@@ -46,5 +46,5 @@ class LayerNormalization(Layer):
         return [self.grad_gamma, self.grad_beta]
     
     def zero_grad(self):
-        self.grad_gamma = np.zeros((self.n_features, 1))
-        self.grad_beta = np.zeros((self.n_features, 1))
+        self.grad_gamma = np.zeros((1, self.n_features))
+        self.grad_beta = np.zeros((1, self.n_features))

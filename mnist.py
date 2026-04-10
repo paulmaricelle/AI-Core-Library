@@ -9,12 +9,12 @@ def load_local_mnist(images_path, labels_path):
     with open(images_path, 'rb') as f:
         data = np.frombuffer(f.read(), np.uint8, offset=16)
     
-    X = data.reshape(-1, 784).T / 255.0
+    X = data.reshape(-1, 784) / 255.0
 
     with open(labels_path, 'rb') as f:
         labels = np.frombuffer(f.read(), np.uint8, offset=8)
 
-    Y = np.eye(10)[labels].T
+    Y = np.eye(10)[labels]
     
     return X.astype(np.float32), Y.astype(np.float32)
 
