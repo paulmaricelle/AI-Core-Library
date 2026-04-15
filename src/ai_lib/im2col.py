@@ -22,7 +22,7 @@ def im2col(X, kernel_size, stride, padding):
             for x in range(kernel_size):
                 x_max = x + stride * out_W
 
-                cols[:, :, y, x, :, :] = X[:, :, y:y_max:stride, x:x_max:stride]
+                cols[:, :, y, x, :, :] = X_padded[:, :, y:y_max:stride, x:x_max:stride]
 
         return cols.reshape(B, C * kernel_size * kernel_size, out_H * out_W)
 

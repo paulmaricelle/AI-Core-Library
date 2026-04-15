@@ -21,7 +21,7 @@ class MaxPooling2D(Layer):
         X_col_reshaped = X_col.reshape(B * C, self.kernel_size * self.kernel_size, -1)
         out_col = np.max(X_col_reshaped, axis=1, keepdims=True)
 
-        self.activation_mask = (X_col == out_col)
+        self.activation_mask = (X_col_reshaped == out_col)
 
         out_h = (H + 2 * self.padding - self.kernel_size) // self.stride + 1
         out_w = (W + 2 * self.padding - self.kernel_size) // self.stride + 1
