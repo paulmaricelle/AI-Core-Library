@@ -21,10 +21,7 @@ def load_local_mnist(images_path, labels_path):
 X_train, Y_train = load_local_mnist('data/mnist/train-images.idx3-ubyte', 'data/mnist/train-labels.idx1-ubyte')
 X_val, Y_val = load_local_mnist('data/mnist/t10k-images.idx3-ubyte', 'data/mnist/t10k-labels.idx1-ubyte')
 
-network = Sequential([layers.Linear(784, 256, "xavier"), layers.LayerNormalization(256),
-                      layers.ReLU(), layers.Dropout(0.4), layers.Linear(256, 128),
-                      layers.LayerNormalization(128), layers.ReLU(), layers.Dropout(0.4),
-                      layers.Linear(128, 10)])
+network = Sequential()
 
 model = Model(network)
 try:
