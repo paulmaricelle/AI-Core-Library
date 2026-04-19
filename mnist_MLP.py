@@ -27,6 +27,7 @@ network = Sequential([layers.Linear(784, 256, "xavier"), layers.LayerNormalizati
                       layers.Linear(128, 10)])
 
 model = Model(network)
+#This achieves 98% accuracy on training set
 try:
     model.fit(X_train, Y_train, 50, losses.SoftmaxCrossEntropy(), optimizers.Adam(learning_rate=0.0001, weight_decay=0.01), batch_size=32, accumulation_steps=4, validation_data=[X_val, Y_val], early_stopping=True, patience=20, metrics=[metrics.accuracy])
 except KeyboardInterrupt:
