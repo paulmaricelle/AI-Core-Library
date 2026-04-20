@@ -69,3 +69,16 @@ class ConvTranspose2d(Layer):
             self.grad_b += grad_b
         
         return dX_transposed.reshape(B, C, H_in, W_in)
+    
+    def get_params(self):
+        return [self.W, self.b]
+    
+    def get_reg_info(self):
+        return [True, False]
+    
+    def get_grads(self):
+        return [self.grad_W, self.grad_b]
+    
+    def zero_grad(self):
+        self.grad_W = None
+        self.grad_b = None
