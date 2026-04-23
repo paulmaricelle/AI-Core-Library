@@ -4,7 +4,7 @@ import numpy as np
 #Class which acts as a composition of the CrossEntropy loss and of the Softmax activation
 #It eases the backpropagation
 class SoftmaxCrossEntropy(Loss):
-    def forward(self, X, y_true):
+    def forward(self, X: np.ndarray, y_true: np.ndarray) -> float:
         self.y_true = y_true
 
         exp = np.exp(X - np.max(X, axis=1, keepdims=True))
@@ -17,7 +17,7 @@ class SoftmaxCrossEntropy(Loss):
         loss = np.sum(log_prob * y_true) / batch_size
         return loss
     
-    def backward(self):
+    def backward(self) -> np.ndarray:
         batchsize = self.y_true.shape[0]
         return (self.y_pred - self.y_true) / batchsize
 
