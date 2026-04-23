@@ -1,9 +1,10 @@
 import numpy as np
 from .layer import Layer
 from ..im2col import im2col, col2im
+from typing import Optional
 
 class Conv2d(Layer):
-    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0):
+    def __init__(self, in_channels: int, out_channels: int, kernel_size: int, stride: int =1, padding: int =0):
         super().__init__()
         he_factor = np.sqrt(2 / (in_channels * kernel_size * kernel_size))
         self.W = np.random.randn(out_channels, in_channels, kernel_size, kernel_size) * he_factor
@@ -12,10 +13,10 @@ class Conv2d(Layer):
         self.kernel_size = kernel_size
         self.stride = stride
         self.padding = padding
-        self.grad_W = None
-        self.grad_b = None
+        self.grad_W: Optional[np.ndarray] = None
+        self.grad_b: Optional[np.ndarray] = None
 
-    def forward(self, X):
+    def forward(self, X: np.ndarray):
         self.input = X
         self.input_shape = X.shape
         self.out_H = (self.input_shape[2] + 2 * self.padding - self.kernel_size) // self.stride + 1
@@ -31,7 +32,7 @@ class Conv2d(Layer):
 
         return out + self.b
     
-    def backward(self, grad_wrt_output):
+    def backward(self, grad_wrt_output: np.ndarray):
         dY_cols = grad_wrt_output.reshape(grad_wrt_output.shape[0], self.out_channels, -1)
         dW_flat = np.tensordot(dY_cols, self.X_col, axes=([0, 2], [0, 2]))
 

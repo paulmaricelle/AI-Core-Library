@@ -2,7 +2,7 @@ from .layer import Layer
 import numpy as np
 
 class LayerNormalization(Layer):
-    def __init__(self, n_features, epsilon = 1e-10):
+    def __init__(self, n_features: int, epsilon : float = 1e-10):
         super().__init__()
 
         self.n_features = n_features
@@ -13,7 +13,7 @@ class LayerNormalization(Layer):
         self.epsilon = epsilon
         
 
-    def forward(self, X):
+    def forward(self, X: np.ndarray) -> np.ndarray:
         self.input = X
         self.mean = np.mean(X, axis=1, keepdims=True)
         self.var = np.var(X, axis=1, mean=self.mean, keepdims=True)
@@ -22,7 +22,7 @@ class LayerNormalization(Layer):
         self.X_hat = self.X_centered * self.std_inv
         return self.gamma * self.X_hat + self.beta
     
-    def backward(self, grad_wrt_output):
+    def backward(self, grad_wrt_output: np.ndarray) -> np.ndarray:
         self.grad_gamma += np.sum(grad_wrt_output * self.X_hat, axis=0, keepdims=True)
         self.grad_beta += np.sum(grad_wrt_output, axis=0, keepdims=True)
 

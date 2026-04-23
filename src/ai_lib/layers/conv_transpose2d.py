@@ -1,9 +1,10 @@
 import numpy as np
 from .layer import Layer
 from ..im2col import im2col, col2im
+from typing import Optional
 
 class ConvTranspose2d(Layer):
-    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0):
+    def __init__(self, in_channels: int, out_channels: int, kernel_size: int, stride: int =1, padding: int =0):
         super().__init__()
         he_factor = np.sqrt(2 / (in_channels * kernel_size * kernel_size))
         self.W = np.random.randn(in_channels, out_channels, kernel_size, kernel_size) * he_factor
@@ -13,10 +14,10 @@ class ConvTranspose2d(Layer):
         self.kernel_size = kernel_size
         self.stride = stride
         self.padding = padding
-        self.grad_W = None
-        self.grad_b = None
+        self.grad_W: Optional[np.ndarray] = None
+        self.grad_b: Optional[np.ndarray] = None
 
-    def forward(self, X):
+    def forward(self, X: np.ndarray):
         self.input_shape = X.shape
         B, C, H, W = X.shape
 
@@ -37,7 +38,7 @@ class ConvTranspose2d(Layer):
         else:
             return Y_col + self.b
         
-    def backward(self, grad_wrt_output):
+    def backward(self, grad_wrt_output: np.ndarray):
         B, C, H_in, W_in = self.input_shape
         grad_b = np.sum(grad_wrt_output, axis=(0, 2, 3), keepdims=True)
 

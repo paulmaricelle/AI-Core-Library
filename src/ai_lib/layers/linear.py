@@ -1,8 +1,9 @@
 from .layer import Layer
 import numpy as np
+from typing import Optional
 
 class Linear(Layer):
-    def __init__(self, n_input, n_out, init_method = "xavier"):
+    def __init__(self, n_input: int, n_out: int, init_method: str = "xavier"):
         super().__init__()
         if init_method == "xavier":
             limit = np.sqrt(6.0 / (n_out + n_input))
@@ -14,17 +15,17 @@ class Linear(Layer):
             self.W = np.random.randn(n_out, n_input) * 10e-2
         self.b = np.zeros((1, n_out))
 
-        self.grad_W = None
-        self.grad_b = None
-        self.input = None
-        self.output = None
+        self.grad_W: Optional[np.ndarray] = None
+        self.grad_b: Optional[np.ndarray] = None
+        self.input: Optional[np.ndarray] = None
+        self.output: Optional[np.ndarray] = None
 
-    def forward(self, X):
+    def forward(self, X: np.ndarray) -> np.ndarray:
         self.input = X
         self.output = np.dot(self.input, self.W.T) + self.b
         return self.output
     
-    def backward(self, grad_wrt_output):
+    def backward(self, grad_wrt_output: np.ndarray) -> np.ndarray:
         #Gradient par rapport aux poids
         grad_W_current = np.dot(grad_wrt_output.T, self.input)
         

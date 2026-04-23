@@ -1,18 +1,19 @@
 import numpy as np
 from .layer import Layer
 from ..im2col import im2col, col2im
+from typing import Optional, Tuple
 
 class MaxPooling2D(Layer):
-    def __init__(self, kernel_size=2, stride=2, padding=0):
+    def __init__(self, kernel_size: int =2, stride: int =2, padding: int =0):
         super().__init__()
         self.kernel_size = kernel_size
         self.stride = stride
         self.padding = padding
 
-        self.activation_mask = None
-        self.input_shape = None
+        self.activation_mask: np.ndarray = None
+        self.input_shape: Optional[Tuple[int]] = None
 
-    def forward(self, X):
+    def forward(self, X: np.ndarray) -> np.ndarray:
         self.input_shape = X.shape
         B, C, H, W = X.shape
 
@@ -28,7 +29,7 @@ class MaxPooling2D(Layer):
 
         return out_col.reshape(B, C, out_h, out_w)
 
-    def backward(self, grad_wrt_output):
+    def backward(self, grad_wrt_output: np.ndarray) -> np.ndarray:
         B, C, out_h, out_w = grad_wrt_output.shape
         
         dY_col = grad_wrt_output.reshape(B * C, 1, -1)

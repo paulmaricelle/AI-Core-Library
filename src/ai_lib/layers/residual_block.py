@@ -1,13 +1,14 @@
 import numpy as np
 from .layer import Layer
+from typing import List, Optional
 
 class ResidualBlock(Layer):
-    def __init__(self, inner_layers, shortcut=None):
+    def __init__(self, inner_layers: List[Layer], shortcut: Optional[Layer] =None):
         super().__init__()
         self.layers = inner_layers
         self.shortcut = shortcut
 
-    def forward(self, X):
+    def forward(self, X: np.ndarray) -> np.ndarray:
         out = X
         for layer in self.layers:
             out = layer.forward(out)
@@ -16,7 +17,7 @@ class ResidualBlock(Layer):
         else:
             return self.shortcut.forward(X) + out
     
-    def backward(self, grad_wrt_output):
+    def backward(self, grad_wrt_output: np.ndarray) -> np.ndarray:
         whole_grad = grad_wrt_output
         for layer in reversed(self.layers):
             whole_grad = layer.backward(whole_grad)

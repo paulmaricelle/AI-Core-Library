@@ -1,12 +1,12 @@
 from .layer import Layer
 import numpy as np
+from typing import Optional
 
 class Dropout(Layer):
-    def __init__(self, dropout_rate = 0.3):
+    def __init__(self, dropout_rate: float = 0.3):
         super().__init__()
         self.rate = dropout_rate
-        self.mask = None
-
+        self.mask: Optional[np.ndarray] = None
 
     def forward(self, X):
         if self.training:
