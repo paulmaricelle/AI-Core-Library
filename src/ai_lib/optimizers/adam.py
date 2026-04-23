@@ -1,24 +1,25 @@
 from .opti import Optimizer
 import numpy as np
+from typing import List
 
 class Adam(Optimizer):
-    def __init__(self, learning_rate= 1e-3, beta_1 = 0.9, beta_2 = 0.999, epsilon = 1e-8, weight_decay=0):
+    def __init__(self, learning_rate: float = 1e-3, beta_1: float = 0.9, beta_2: float = 0.999, epsilon: float = 1e-8, weight_decay: float =0):
         super().__init__()
         self.lr = learning_rate
         self.b1 = beta_1
         self.b2 = beta_2 
         self.epsilon = epsilon
         self.weight_decay = weight_decay
-        self.m = []
-        self.v = []
-        self.t = 1
+        self.m: List[np.ndarray] = []
+        self.v: List[np.ndarray] = []
+        self.t: int = 1
 
     def _init_state(self):
         self.m = [np.zeros_like(p) for p in self.params]
         self.v = [np.zeros_like(p) for p in self.params]
         self.t = 1
         
-    def step(self, accumulation_steps):
+    def step(self, accumulation_steps: int) -> None:
         self.get_grads()
         if len(self.params) != len(self.grads):
             raise ValueError(f"Mismatch: Optimizer has {len(self.params)} params "
