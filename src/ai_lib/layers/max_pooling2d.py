@@ -11,7 +11,7 @@ class MaxPooling2D(Layer):
         self.padding = padding
 
         self.activation_mask: np.ndarray = None
-        self.input_shape: Optional[Tuple[int]] = None
+        self.input_shape: Optional[Tuple[int, ...]] = None
 
     def forward(self, X: np.ndarray) -> np.ndarray:
         self.input_shape = X.shape

@@ -1,13 +1,14 @@
 import numpy as np
 from .metrics import accuracy, mae, mse, binary_metrics
 from .dataLoader import DataLoader
+from typing import Optional, Tuple
 
 class Model:
     def __init__(self, sequential):
         self.sequential = sequential
 
 
-    def train_step(self, X, y, loss):
+    def train_step(self, X: np.ndarray, y: np.ndarray, loss) -> Tuple[float, np.ndarray]:
         y_pred = self.sequential.forward(X)
         loss_val = loss(y_pred, y)
 
@@ -16,7 +17,7 @@ class Model:
 
         return loss_val, y_pred
         
-    def fit(self, X, y, epochs, loss, optimizer, batch_size=1, validation_data = None, early_stopping=False, patience = 50, accumulation_steps=1, metrics = [], binary_classification_threshold = 0.5, verbose=True):
+    def fit(self, X: np.ndarray, y: np.ndarray, epochs: int, loss, optimizer, batch_size: int = 1, validation_data: Optional[Tuple[np.ndarray, np.ndarray]] = None, early_stopping: bool = False, patience: int = 50, accumulation_steps: int = 1, metrics: list = [], binary_classification_threshold: float = 0.5, verbose: bool = True) -> None:
         optimizer.setup(self.sequential.layers)
         n_samples = X.shape[0]
 
@@ -73,16 +74,16 @@ class Model:
                     print("Early Stopping, patience reached")
                 break
 
-    def predict(self, X):
+    def predict(self, X: np.ndarray) -> np.ndarray:
         self.sequential.set_training(False)
         return self.sequential.forward(X)
     
-    def predict_proba(self, X):
+    def predict_proba(self, X: np.ndarray) -> np.ndarray:
         logits = self.predict(X)
         exp = np.exp(logits - np.max(logits, axis=1, keepdims=True))
         return exp / np.sum(exp, axis=1, keepdims=True)
     
-    def compute_metrics(self, X, y, metrics, threshold, batch_size=32):
+    def compute_metrics(self, X: np.ndarray, y: np.ndarray, metrics: list, threshold: float, batch_size: int = 32):
         dataLoader = DataLoader(X, y, batch_size=batch_size, shuffle=False)
         val_metrics = np.zeros((len(metrics),))
         for X_batch, y_batch in dataLoader:

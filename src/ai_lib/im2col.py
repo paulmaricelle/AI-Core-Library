@@ -1,6 +1,6 @@
 import numpy as np
 
-def im2col(X, kernel_size, stride, padding):
+def im2col(X: np.ndarray, kernel_size: int, stride: int, padding: int) -> np.ndarray:
         B, C, H, W = X.shape
 
         out_H = (H + 2 * padding - kernel_size) // stride + 1
@@ -26,7 +26,7 @@ def im2col(X, kernel_size, stride, padding):
 
         return cols.reshape(B, C * kernel_size * kernel_size, out_H * out_W)
 
-def col2im(cols, input_shape, kernel_size, stride, padding):
+def col2im(cols: np.ndarray, input_shape: int, kernel_size: int, stride: int, padding: int) -> np.ndarray:
     B, C, H, W = input_shape
     out_h = (H + 2 * padding - kernel_size) // stride + 1
     out_w = (W + 2 * padding - kernel_size) // stride + 1

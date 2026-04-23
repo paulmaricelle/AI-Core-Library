@@ -5,7 +5,7 @@ from typing import Optional, Tuple
 class Flatten(Layer):
     def __init__(self):
         super().__init__()
-        self.input_shape: Optional[Tuple[int]] = None
+        self.input_shape: Optional[Tuple[int, ...]] = None
 
     def forward(self, X: np.ndarray) -> np.ndarray:
         self.input_shape = X.shape
