@@ -9,7 +9,7 @@ class Reshape(Layer):
         self.input_shape: Optional[Tuple[int, ...]] = None
 
     def forward(self, X: np.ndarray) -> np.ndarray:
-        self.input_shape = X.input_shape
+        self.input_shape = X.shape
         return X.reshape((X.shape[0],) + self.output_shape)
     
     def backward(self, grad_wrt_input: np.ndarray) -> np.ndarray:
