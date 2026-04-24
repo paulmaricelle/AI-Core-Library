@@ -15,7 +15,7 @@ class DataLoader():
         for i in range(0, self.n_samples, self.batch_size):
             # Creating copies on the fly to avoid duplicating the whole dataset
             batch_idx = indices[i: i+self.batch_size]
-            yield self.X[batch_idx], self.Y[batch_idx]
+            yield self.X[batch_idx], self.y[batch_idx]
 
     def __len__(self) -> int:
         return (self.n_samples + self.batch_size - 1) // self.batch_size

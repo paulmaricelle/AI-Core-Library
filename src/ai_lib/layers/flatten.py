@@ -11,8 +11,8 @@ class Flatten(Layer):
         self.input_shape = X.shape
         return X.reshape(X.shape[0], -1)
     
-    def backward(self, grad_wrt_input: np.ndarray) -> np.ndarray:
-        return grad_wrt_input.reshape(self.input_shape)
+    def backward(self, grad_wrt_output: np.ndarray) -> np.ndarray:
+        return grad_wrt_output.reshape(self.input_shape)
     
     def get_params(self):
         return []
