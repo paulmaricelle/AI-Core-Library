@@ -13,6 +13,7 @@ class DataLoader():
         indices = np.random.permutation(self.n_samples) if self.shuffle else np.arange(self.n_samples)
 
         for i in range(0, self.n_samples, self.batch_size):
+            # Creating copies on the fly to avoid duplicating the whole dataset
             batch_idx = indices[i: i+self.batch_size]
             yield self.X[batch_idx], self.Y[batch_idx]
 
