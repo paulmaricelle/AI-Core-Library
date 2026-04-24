@@ -30,14 +30,15 @@ class SamplingLayer(Layer):
         return z
     
     def backward(self, grad_wrt_output: np.ndarray) -> np.ndarray:
-        grad_mu_mse = grad_wrt_output
-        grad_log_var_mse = grad_wrt_output * self.epsilon * 0.5 * self.sigma
+        """ The KL divergence gradient is computed and added with this backward """
+        grad_mu_loss = grad_wrt_output
+        grad_log_var_loss = grad_wrt_output * self.epsilon * 0.5 * self.sigma
 
         grad_mu_kl = self.mu
         grad_log_var_kl = 0.5 * (np.exp(self.log_var) - 1.0)
 
-        grad_mu = grad_mu_mse + self.kl_weight * grad_mu_kl
-        grad_log_var = grad_log_var_mse + self.kl_weight * grad_log_var_kl
+        grad_mu = grad_mu_loss + self.kl_weight * grad_mu_kl
+        grad_log_var = grad_log_var_loss + self.kl_weight * grad_log_var_kl
 
         grad_X = np.concatenate([grad_mu, grad_log_var], axis=1)
 
