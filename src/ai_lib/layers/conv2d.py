@@ -8,7 +8,7 @@ class Conv2d(Layer):
         super().__init__()
         he_factor = np.sqrt(2 / (in_channels * kernel_size * kernel_size))
         self.W = np.random.randn(out_channels, in_channels, kernel_size, kernel_size) * he_factor
-        self.b = self.b = np.zeros((1, out_channels, 1, 1))
+        self.b = np.zeros((1, out_channels, 1, 1))
         self.out_channels = out_channels
         self.kernel_size = kernel_size
         self.stride = stride

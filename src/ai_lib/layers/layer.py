@@ -1,6 +1,6 @@
 class Layer:
     def __init__(self):
-        self.training=True
+        self.training: bool = True
 
     def zero_grad(self):
         pass
