@@ -5,7 +5,7 @@ class BinaryCrossEntropy(Loss):
     def forward(self, y_pred: np.ndarray, y_true: np.ndarray) -> float:
         self.y_true = y_true
         self.y_pred = y_pred
-        self.size = y_pred.size
+        self.y_size = y_pred.size
         self.epsilon = 1e-15
 
         loss = -np.mean(
