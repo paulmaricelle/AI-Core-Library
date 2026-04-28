@@ -61,8 +61,8 @@ class Model:
                 optimizer.step(num_batches % accumulation_steps)
                 optimizer.zero_grad()
 
-            if validation_data != None:
-                validation_loss_value = self.get_validation_loss(validation_data, loss=loss)
+            validation_loss_value = (0 if validation_data is None else self.get_validation_loss(validation_data, loss=loss))
+
             if early_stopping:
                 best_loss, wait = self.update_wait(validation_loss_value, best_loss, wait)
 
