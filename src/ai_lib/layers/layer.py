@@ -19,3 +19,11 @@ class Layer:
     
     def get_grads(self):
         raise NotImplementedError("L'obtention des gradients n'est pas implémentée")
+    
+    def get_state(self) -> dict:
+        """ Returns a dictionnary with the layer's parameters"""
+        raise NotImplementedError("L'obtention du dictionnaire avec les paramètres n'est pas implémenté ")
+    
+    def set_state(self) -> None:
+        """ Sets parameters using a dictionnary"""
+        raise NotImplementedError("The set_state method is not implemented")

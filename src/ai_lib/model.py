@@ -124,3 +124,31 @@ class Model:
         else:
             wait += 1
         return best_loss, wait
+    
+    def save_weights(self, filepath: str) -> None:
+        """ Saves model weight as a .npz"""
+        state_dict = {}
+        for i, layer in enumerate(self.network.layers):
+            layer_state = layer.get_state()
+            for key, value in layer_state.items():
+                state_dict[f"{i}_{key}"] = value
+        
+        # Saving everything at once
+        np.savez(filepath, **state_dict)
+        print(f"Model saved at {filepath}")
+
+
+    def load_weights(self, filepath: str):
+        """ Loading saved weights into the model"""
+        data = np.load(filepath)
+        
+        for i, layer in enumerate(self.network.layers):
+            layer_state = {}
+            for key in data.files:
+                if key.startswith(f"{i}_"):
+                    real_key = key.split("_", 1)[1]
+                    layer_state[real_key] = data[key]
+            
+            if layer_state:
+                layer.set_state(layer_state)
+        print(f"Weights loaded from {filepath}")

@@ -83,3 +83,10 @@ class ConvTranspose2d(Layer):
     def zero_grad(self):
         self.grad_W = None
         self.grad_b = None
+
+    def get_state(self):
+        return {'W' : self.W, 'b' : self.b}
+    
+    def set_state(self, state):
+        self.W = state["W"]
+        self.b = state["b"]

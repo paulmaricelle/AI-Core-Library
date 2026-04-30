@@ -57,3 +57,42 @@ class ResidualBlock(Layer):
         if self.shortcut != None:
             grads += self.shortcut.get_grads()
         return grads
+    
+    def get_state(self) -> dict:
+        state = {}
+        
+        for i, layer in enumerate(self.layers):
+            layer_state = layer.get_state()
+            for key, value in layer_state.items():
+                state[f"inner_{i}_{key}"] = value
+                
+        if self.shortcut is not None:
+            shortcut_state = self.shortcut.get_state()
+            for key, value in shortcut_state.items():
+                state[f"shortcut_{key}"] = value              
+        return state
+    
+    def set_state(self, state: dict) -> None:
+        for i, layer in enumerate(self.layers):
+            layer_state = {}
+            prefix = f"inner_{i}_"
+            
+            for key, value in state.items():
+                if key.startswith(prefix):
+                    real_key = key[len(prefix):] 
+                    layer_state[real_key] = value
+                    
+            if layer_state:
+                layer.set_state(layer_state)
+                
+        if self.shortcut is not None:
+            shortcut_state = {}
+            prefix = "shortcut_"
+            
+            for key, value in state.items():
+                if key.startswith(prefix):
+                    real_key = key[len(prefix):]
+                    shortcut_state[real_key] = value
+                    
+            if shortcut_state:
+                self.shortcut.set_state(shortcut_state)

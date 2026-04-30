@@ -23,3 +23,9 @@ class Reshape(Layer):
     
     def get_grads(self):
         return []
+    
+    def get_state(self):
+        return {}
+    
+    def set_state(self, state):
+        pass

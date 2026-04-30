@@ -22,6 +22,12 @@ class ReLU(Layer):
     
     def get_grads(self):
         return []
+    
+    def get_state(self):
+        return {}
+    
+    def set_state(self, state):
+        pass
 
 
 class Sigmoid(Layer):
@@ -45,6 +51,11 @@ class Sigmoid(Layer):
     def get_grads(self):
         return []
 
+    def get_state(self):
+        return {}
+    
+    def set_state(self, state):
+        pass
 
 class Tanh(Layer):
     def __init__(self):
@@ -66,3 +77,9 @@ class Tanh(Layer):
         
     def get_grads(self):
         return []
+    
+    def get_state(self):
+        return {}
+    
+    def set_state(self, state):
+        pass

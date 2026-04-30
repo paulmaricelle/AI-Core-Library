@@ -48,3 +48,10 @@ class LayerNormalization(Layer):
     def zero_grad(self):
         self.grad_gamma = np.zeros((1, self.n_features))
         self.grad_beta = np.zeros((1, self.n_features))
+
+    def get_state(self):
+        return {'gamma' : self.gamma, 'beta' : self.beta}
+    
+    def set_state(self, state):
+        self.gamma = state["gamma"]
+        self.beta = state["beta"]

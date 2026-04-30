@@ -30,3 +30,9 @@ class Dropout(Layer):
     
     def zero_grad(self):
         pass
+
+    def get_state(self):
+        return {}
+    
+    def set_state(self, state):
+        pass
