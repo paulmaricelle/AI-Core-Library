@@ -12,8 +12,9 @@ from .reshape import Reshape
 from .samplingLayer import SamplingLayer
 from .multiSelfAttentionHead import MultiSelfAttentionHead
 from .sequential import Sequential
+from .transformerBlock import TransformerBlock
 
 __all__ = ["Layer", "Linear", "ReLU", "Sigmoid", "Tanh", "Dropout",
            "LayerNormalization", "Conv2d", "MaxPooling2D", "Flatten",
            "ResidualBlock", "ConvTranspose2d", "Reshape", "SamplingLayer",
-           "MultiSelfAttentionHead", "Sequential"]
+           "MultiSelfAttentionHead", "Sequential", "TransformerBlock"]
