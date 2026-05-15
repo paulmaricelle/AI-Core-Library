@@ -2,6 +2,7 @@ from .layer import Layer
 
 class Sequential(Layer):
     def __init__(self, layers: list):
+        super().__init__()
         self.layers = layers
     
     def forward(self, X):
@@ -14,9 +15,10 @@ class Sequential(Layer):
             grad = layer.backward(grad)
         return grad
     
-    def set_training(self, mode):
+    def set_training(self, mode: bool) -> None:
+        self.training = mode
         for layer in self.layers:
-            layer.training = mode
+            layer.set_training(mode)
 
     def get_params(self):
         params = []
@@ -33,6 +35,12 @@ class Sequential(Layer):
     def zero_grad(self):
         for layer in self.layers:
             layer.zero_grad()
+
+    def get_reg_info(self):
+        reg_info = []
+        for layer in self.layers:
+            reg_info.extend(layer.get_reg_info())
+        return reg_info
 
     def get_state(self):
         state = {}

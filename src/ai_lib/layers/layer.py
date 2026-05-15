@@ -33,3 +33,6 @@ class Layer:
     
     def reset_cache(self) -> None:
         pass
+
+    def set_training(self, training_mode: bool) -> None:
+        self.training = training_mode

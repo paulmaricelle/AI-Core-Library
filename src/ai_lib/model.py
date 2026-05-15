@@ -18,7 +18,7 @@ class Model:
         return loss_val, y_pred
         
     def fit(self, X: np.ndarray, y: np.ndarray, epochs: int, loss, optimizer, batch_size: int = 1, validation_data: Optional[Tuple[np.ndarray, np.ndarray]] = None, early_stopping: bool = False, patience: int = 50, accumulation_steps: int = 1, metrics: list = [], binary_classification_threshold: float = 0.5, verbose: bool = True) -> None:
-        optimizer.setup(self.sequential.layers)
+        optimizer.setup([self.sequential])
         n_samples = X.shape[0]
 
         #Printing period
@@ -127,28 +127,12 @@ class Model:
     
     def save_weights(self, filepath: str) -> None:
         """ Saves model weight as a .npz"""
-        state_dict = {}
-        for i, layer in enumerate(self.network.layers):
-            layer_state = layer.get_state()
-            for key, value in layer_state.items():
-                state_dict[f"{i}_{key}"] = value
-        
-        # Saving everything at once
+        state_dict = self.sequential.get_state()
         np.savez(filepath, **state_dict)
         print(f"Model saved at {filepath}")
 
-
-    def load_weights(self, filepath: str):
+    def load_weights(self, filepath: str) -> None:
         """ Loading saved weights into the model"""
         data = np.load(filepath)
-        
-        for i, layer in enumerate(self.network.layers):
-            layer_state = {}
-            for key in data.files:
-                if key.startswith(f"{i}_"):
-                    real_key = key.split("_", 1)[1]
-                    layer_state[real_key] = data[key]
-            
-            if layer_state:
-                layer.set_state(layer_state)
+        self.sequential.set_state(data)
         print(f"Weights loaded from {filepath}")

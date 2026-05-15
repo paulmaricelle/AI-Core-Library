@@ -104,3 +104,8 @@ class ResidualBlock(Layer):
     def reset_cache(self) -> None:
         for layer in self.layers:
             layer.reset_cache()
+
+    def set_training(self, mode: bool) -> None:
+        self.training = mode
+        for layer in self.layers:
+            layer.set_training(mode)
