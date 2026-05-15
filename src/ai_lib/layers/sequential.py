@@ -29,6 +29,10 @@ class Sequential(Layer):
         for layer in self.layers:
             grads.extend(layer.get_grads())
         return grads
+    
+    def zero_grad(self):
+        for layer in self.layers:
+            layer.zero_grad()
 
     def get_state(self):
         state = {}

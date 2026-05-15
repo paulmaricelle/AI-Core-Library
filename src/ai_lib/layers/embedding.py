@@ -8,6 +8,7 @@ class Embedding(Layer):
         self.d_model = d_model
 
         self.W = np.random.randn(vocab_size, d_model) * 0.01
+        self.dW = None
 
     def forward(self, X: np.ndarray) -> np.ndarray:
         """
@@ -19,7 +20,8 @@ class Embedding(Layer):
         return self.W[X]
     
     def backward(self, dOutput: np.ndarray) -> None:
-        self.dW = np.zeros_like(self.W)
+        if self.dW is None:
+            self.dW = np.zeros_like(self.W)
         np.add.at(self.dW, self.X, dOutput)
 
     def get_params(self):

@@ -24,6 +24,11 @@ class MultiSelfAttentionHead(Layer):
         self.W_v = np.random.randn(d_model, d_model) * np.sqrt(2 / d_model)
 
         self.W_o = np.random.randn(d_model, d_model) * np.sqrt(2 / d_model)
+
+        self.dW_q = None
+        self.dW_k = None
+        self.dW_v = None
+        self.dW_o = None
     
     def forward(self, X: np.ndarray) -> np.ndarray:
         """
@@ -79,7 +84,7 @@ class MultiSelfAttentionHead(Layer):
         Computes the gradients of the loss with respect to the parameters and to X
         """
         B, T, D = self.X.shape
-        self.dW_o = np.einsum('bid,bij->dj', self.Z, d_output)
+        dW_o = np.einsum('bid,bij->dj', self.Z, d_output)
 
         dZ_flat = np.einsum('bij,dj->bid', d_output, self.W_o)
         dZ = dZ_flat.reshape(B, T, self.n_heads, self.d_k)
@@ -102,9 +107,20 @@ class MultiSelfAttentionHead(Layer):
         dV_flat = dV.reshape(B, T, D)
         
         # Forward : Q = X * W_q etc
-        self.dW_q = np.einsum('bid,bij->dj', self.X, dQ_flat)
-        self.dW_k = np.einsum('bid,bij->dj', self.X, dK_flat)
-        self.dW_v = np.einsum('bid,bij->dj', self.X, dV_flat)
+        dW_q = np.einsum('bid,bij->dj', self.X, dQ_flat)
+        dW_k = np.einsum('bid,bij->dj', self.X, dK_flat)
+        dW_v = np.einsum('bid,bij->dj', self.X, dV_flat)
+
+        if self.dW_q is None:
+            self.dW_q = dW_q
+            self.dW_k = dW_k
+            self.dW_v = dW_v
+            self.dW_o = dW_o
+        else:
+            self.dW_q += dW_q
+            self.dW_k += dW_k
+            self.dW_v += dW_v
+            self.dW_o += dW_o
 
         # Get gradients with respect to different X and sum them
         dX_q = np.einsum('bij,dj->bid', dQ_flat, self.W_q)
