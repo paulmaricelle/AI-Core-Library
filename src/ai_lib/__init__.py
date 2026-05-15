@@ -4,4 +4,4 @@ from . import optimizers
 from .layers.sequential import Sequential
 from .model import Model
 from .metrics import mae, mse, accuracy, binary_metrics
-from .dataLoader import DataLoader
+from .dataLoader import DataLoader, SequenceDataLoader

@@ -21,30 +21,37 @@ class Linear(Layer):
         self.output: Optional[np.ndarray] = None
 
     def forward(self, X: np.ndarray) -> np.ndarray:
-        self.input = X
-        self.output = np.dot(self.input, self.W.T) + self.b
+        self.original_input_shape = X.shape
+        
+        # Flatten and do the maths in 2d in case data is of larger dimension
+        self.input_flat = X.reshape(-1, X.shape[-1])
+        
+        output_flat = np.dot(self.input_flat, self.W.T) + self.b
+        
+        # Back to initial shape
+        new_shape = list(self.original_input_shape[:-1]) + [self.W.shape[0]]
+        self.output = output_flat.reshape(*new_shape)
+        
         return self.output
     
     def backward(self, grad_wrt_output: np.ndarray) -> np.ndarray:
-        #Gradient par rapport aux poids
-        grad_W_current = np.dot(grad_wrt_output.T, self.input)
+        grad_out_flat = grad_wrt_output.reshape(-1, grad_wrt_output.shape[-1])
         
-        #Gradient par rapport au biais
-        grad_b_current = np.sum(grad_wrt_output, axis=0, keepdims=True)
+        grad_W_current = np.dot(grad_out_flat.T, self.input_flat)
         
-        grad_wrt_input = np.dot(grad_wrt_output, self.W)
+        grad_b_current = np.sum(grad_out_flat, axis=0, keepdims=True)
 
+        grad_in_flat = np.dot(grad_out_flat, self.W)
+
+        # Gradient accumulation
         if self.grad_W is None:
             self.grad_W = grad_W_current
-        else:
-            self.grad_W += grad_W_current
-
-        if self.grad_b is None:
             self.grad_b = grad_b_current
         else:
+            self.grad_W += grad_W_current
             self.grad_b += grad_b_current
 
-        return grad_wrt_input
+        return grad_in_flat.reshape(self.original_input_shape)
     
     def get_params(self):
         return [self.W, self.b]
