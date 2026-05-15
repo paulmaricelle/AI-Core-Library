@@ -1,38 +1,52 @@
 from .layer import Layer
 import numpy as np
+from typing import Optional
 
 class LayerNormalization(Layer):
-    def __init__(self, n_features: int, epsilon : float = 1e-10):
+    def __init__(self, n_features: int, epsilon : float = 1e-5):
         super().__init__()
 
         self.n_features = n_features
-        self.gamma = np.ones((1, self.n_features))
-        self.beta = np.zeros((1, self.n_features))
-        self.grad_gamma = np.zeros((1, self.n_features))
-        self.grad_beta = np.zeros((1, self.n_features))
         self.epsilon = epsilon
         
+        self.gamma = np.ones(self.n_features)
+        self.beta = np.zeros(self.n_features)
 
+        self.grad_gamma: Optional[np.ndarray] = None
+        self.grad_beta: Optional[np.ndarray] = None
+        
     def forward(self, X: np.ndarray) -> np.ndarray:
         self.input = X
-        self.mean = np.mean(X, axis=1, keepdims=True)
-        self.var = np.var(X, axis=1, mean=self.mean, keepdims=True)
+        self.mean = np.mean(X, axis=-1, keepdims=True)
+        self.var = np.var(X, axis=-1, mean=self.mean, keepdims=True)
+
         self.X_centered = X - self.mean
         self.std_inv = 1 / (np.sqrt(self.var + self.epsilon))
         self.X_hat = self.X_centered * self.std_inv
+
         return self.gamma * self.X_hat + self.beta
     
     def backward(self, grad_wrt_output: np.ndarray) -> np.ndarray:
-        self.grad_gamma += np.sum(grad_wrt_output * self.X_hat, axis=0, keepdims=True)
-        self.grad_beta += np.sum(grad_wrt_output, axis=0, keepdims=True)
+        # We want to sum along all axes except for the last one
+        sum_axes = tuple(range(grad_wrt_output.ndim - 1))
 
-        n_features = self.n_features
+        grad_gamma_current = np.sum(grad_wrt_output * self.X_hat, axis=sum_axes)
+        grad_beta_current = np.sum(grad_wrt_output, axis=sum_axes)
+
+        if self.grad_gamma is None:
+            self.grad_gamma = grad_gamma_current
+            self.grad_beta = grad_beta_current
+        else:
+            self.grad_gamma += grad_gamma_current
+            self.grad_beta += grad_beta_current
+
+        D = self.n_features
 
         dx_hat = grad_wrt_output * self.gamma
-        da = (1.0 / n_features) * (
-            n_features * dx_hat - 
-            np.sum(dx_hat, axis=1, keepdims=True) - 
-            self.X_hat * np.sum(dx_hat * self.X_hat, axis=1, keepdims=True)
+        da = (1.0 / D) * (
+            D * dx_hat - 
+            np.sum(dx_hat, axis=-1, keepdims=True) - 
+            self.X_hat * np.sum(dx_hat * self.X_hat, axis=-1, keepdims=True)
         )
         return self.std_inv * da
     
@@ -46,8 +60,8 @@ class LayerNormalization(Layer):
         return [self.grad_gamma, self.grad_beta]
     
     def zero_grad(self):
-        self.grad_gamma = np.zeros((1, self.n_features))
-        self.grad_beta = np.zeros((1, self.n_features))
+        self.grad_gamma = None
+        self.grad_beta = None
 
     def get_state(self):
         return {'gamma' : self.gamma, 'beta' : self.beta}
