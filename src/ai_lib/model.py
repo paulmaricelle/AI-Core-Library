@@ -1,142 +1,142 @@
 import numpy as np
-from .metrics import accuracy, mae, mse, binary_metrics
-from .dataLoader import DataLoader
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
 
 class Model:
     def __init__(self, sequential):
         self.sequential = sequential
 
-
-    def train_step(self, X: np.ndarray, y: np.ndarray, loss) -> Tuple[float, np.ndarray]:
+    def train_step(self, X: np.ndarray, y: np.ndarray, loss_fn) -> Tuple[float, np.ndarray]:
         y_pred = self.sequential.forward(X)
-        loss_val = loss(y_pred, y)
+        loss_val = loss_fn.forward(y_pred, y)
 
-        grad = loss.backward()
+        grad = loss_fn.backward()
         self.sequential.backward(grad)
 
         return loss_val, y_pred
+
+    def fit(self, 
+            dataloader, 
+            epochs: int, 
+            loss, 
+            optimizer, 
+            validation_dataloader=None, 
+            early_stopping: bool = False, 
+            patience: int = 50, 
+            accumulation_steps: int = 1, 
+            metrics: List = [], 
+            binary_classification_threshold: float = 0.5, 
+            verbose: bool = True) -> None:
         
-    def fit(self, X: np.ndarray, y: np.ndarray, epochs: int, loss, optimizer, batch_size: int = 1, validation_data: Optional[Tuple[np.ndarray, np.ndarray]] = None, early_stopping: bool = False, patience: int = 50, accumulation_steps: int = 1, metrics: list = [], binary_classification_threshold: float = 0.5, verbose: bool = True) -> None:
         optimizer.setup([self.sequential])
-        n_samples = X.shape[0]
+        
+        # Period in epochs for printing
+        period = max(1, 10**(int(np.log10(epochs))-2)) if epochs > 0 else 1
+        
+        best_loss = np.inf
+        wait = 0
 
-        #Printing period
-        period = max(1, 10**(int(np.log10(epochs)-2)))
-        #Early Stopping
-        early_stopping = early_stopping and (validation_data != None)
-        if early_stopping:
-            wait = 0
-            best_loss = np.inf
-
-        #Actual training
         for epoch in range(epochs):
-            dataLoader = DataLoader(X, y, batch_size=batch_size, shuffle=True)
-
             loss_value = 0
             self.sequential.set_training(True)
             epoch_metrics = np.zeros((len(metrics),))
+            processed_samples = 0
 
-            for i, (x_batch, y_batch) in enumerate(dataLoader):
+            # Iterating on the DataLoader
+            for i, (x_batch, y_batch) in enumerate(dataloader):
+                
+                # Handling gradient accumulation
                 if i % accumulation_steps == 0:
                     optimizer.zero_grad()
 
                 loss_batch, y_pred = self.train_step(x_batch, y_batch, loss)
+                
                 actual_batch_size = x_batch.shape[0]
                 loss_value += loss_batch * actual_batch_size
+                processed_samples += actual_batch_size
 
-                #Handling of accumulation of gradients
-                if i % accumulation_steps == accumulation_steps - 1:
-                    optimizer.step(accumulation_steps)
-
+                # Metrics on this bacth
                 for j, metric_fn in enumerate(metrics):
                     batch_metric = metric_fn(y_pred, y_batch, binary_classification_threshold)
                     epoch_metrics[j] += batch_metric * actual_batch_size
 
-            mean_loss = loss_value / n_samples
-            epoch_metrics = epoch_metrics / n_samples
-            
-            num_batches = (n_samples + batch_size - 1) // batch_size
-            if num_batches % accumulation_steps != 0:
-                optimizer.step(num_batches % accumulation_steps)
-                optimizer.zero_grad()
+                # Update weights once accumulation is over with
+                if i % accumulation_steps == accumulation_steps - 1:
+                    optimizer.step(accumulation_steps)
 
-            validation_loss_value = (0 if validation_data is None else self.get_validation_loss(validation_data, loss=loss))
+            # Computing means over the epoch
+            mean_loss = loss_value / processed_samples if processed_samples > 0 else 0
+            epoch_metrics = epoch_metrics / processed_samples if processed_samples > 0 else epoch_metrics
 
-            if early_stopping:
-                best_loss, wait = self.update_wait(validation_loss_value, best_loss, wait)
+            # Validation
+            validation_loss_value = None
+            if validation_dataloader is not None:
+                validation_loss_value = self.evaluate_loss(validation_dataloader, loss)
+                
+                if early_stopping:
+                    if validation_loss_value < best_loss:
+                        best_loss = validation_loss_value
+                        wait = 0
+                    else:
+                        wait += 1
 
-            if epoch % period == 0:
-                self.log_post_epoch(epoch_metrics, validation_data, mean_loss, metrics, binary_classification_threshold, epoch, verbose, validation_loss_value)
+            # Logging
+            if verbose and epoch % period == 0:
+                self._log_epoch(epoch, mean_loss, epoch_metrics, metrics, validation_dataloader, validation_loss_value, binary_classification_threshold)
 
             if early_stopping and wait >= patience:
-                if verbose:
-                    print("Early Stopping, patience reached")
+                if verbose: print(f"Early Stopping reached at epoch : {epoch}")
                 break
 
-    def predict(self, X: np.ndarray) -> np.ndarray:
+    def evaluate_loss(self, dataloader, loss_fn) -> float:
+        """Computes the mean loss over a whole dataloader"""
         self.sequential.set_training(False)
-        return self.sequential.forward(X)
-    
-    def predict_proba(self, X: np.ndarray) -> np.ndarray:
-        logits = self.predict(X)
-        if (logits.shape)[-1] == 1:
-            raise RuntimeError("Predict_proba is not intended for binary classification. Use Predict() instead.\n"
-                "This method is designed to transform logits into probabilities for multiclass classification, "
-                "since the softmaxCrossEntropy loss expects raw logits.")
-        exp = np.exp(logits - np.max(logits, axis=1, keepdims=True))
-        return exp / np.sum(exp, axis=1, keepdims=True)
-    
-    def compute_metrics(self, X: np.ndarray, y: np.ndarray, metrics: list, threshold: float, batch_size: int = 32):
-        dataLoader = DataLoader(X, y, batch_size=batch_size, shuffle=False)
+        total_loss = 0
+        total_samples = 0
+        for x_batch, y_batch in dataloader:
+            y_pred = self.sequential.forward(x_batch)
+            total_loss += loss_fn.forward(y_pred, y_batch) * x_batch.shape[0]
+            total_samples += x_batch.shape[0]
+        return total_loss / total_samples if total_samples > 0 else 0
+
+    def compute_metrics(self, dataloader, metrics: list, threshold: float):
+        """Computes metrics over a whole dataloader"""
+        self.sequential.set_training(False)
         val_metrics = np.zeros((len(metrics),))
-        for X_batch, y_batch in dataLoader:
-            y_pred = self.sequential.forward(X_batch)
-            actual_batch_size = X_batch.shape[0]
+        total_samples = 0
+        
+        for x_batch, y_batch in dataloader:
+            y_pred = self.sequential.forward(x_batch)
+            actual_batch_size = x_batch.shape[0]
+            total_samples += actual_batch_size
 
             for j, metric_fn in enumerate(metrics):
                 val_metrics[j] += metric_fn(y_pred, y_batch, threshold) * actual_batch_size
         
-        return val_metrics / dataLoader.n_samples
-    
-    def log_post_epoch(self, epoch_metrics, validation_data, mean_loss, metrics, binary_classification_threshold, epoch, verbose, validation_loss_value=None):
-        if validation_data != None:
-            #Metrics on validation
-            val_epoch_metrics = self.compute_metrics(validation_data[0], validation_data[1], metrics, binary_classification_threshold, batch_size=32)
-            for i in range(len(metrics)):
-                print(f"{metrics[i].__name__} on validation set is {round(val_epoch_metrics[i], 5)}")
+        return val_metrics / total_samples if total_samples > 0 else val_metrics
 
-        #Metrics on training set
-        for i in range(len(metrics)):
-            print(f"{metrics[i].__name__} on training set is {round(epoch_metrics[i], 5)}")
-                
-        if verbose:
-            print(f"Iteration {epoch} completed, loss is {mean_loss}")
-            if validation_data != None:
-                #There is no need to divide by the number of samples as there is only one batch so it is done instantly
-                print(f"Iteration {epoch} completed, validation loss is {validation_loss_value}")
-
-    def get_validation_loss(self, validation_data, loss):
+    def predict(self, X: np.ndarray) -> np.ndarray:
         self.sequential.set_training(False)
-        y_pred = self.sequential.forward(validation_data[0])
-        return loss(y_pred, validation_data[1])
-    
-    def update_wait(self, validation_loss_value, best_loss, wait):     
-        if validation_loss_value < best_loss:
-            best_loss = validation_loss_value
-            wait = 0
-        else:
-            wait += 1
-        return best_loss, wait
-    
+        return self.sequential.forward(X)
+
+    def _log_epoch(self, epoch, loss, epoch_metrics, metrics, val_loader, val_loss, threshold):
+        """ Clean display """
+        print(f"\n--- Epoch : {epoch} ---")
+        print(f"Training loss : {loss:.5f}")
+        for i, m in enumerate(metrics):
+            print(f"  {m.__name__} (train) : {epoch_metrics[i]:.5f}")
+        
+        if val_loader is not None:
+            print(f"Validation loss : {val_loss:.5f}")
+            val_metrics = self.compute_metrics(val_loader, metrics, threshold)
+            for i, m in enumerate(metrics):
+                print(f"  {m.__name__} (val) : {val_metrics[i]:.5f}")
+
     def save_weights(self, filepath: str) -> None:
-        """ Saves model weight as a .npz"""
         state_dict = self.sequential.get_state()
         np.savez(filepath, **state_dict)
-        print(f"Model saved at {filepath}")
+        print(f"Model saved : {filepath}")
 
-    def load_weights(self, filepath: str) -> None:
-        """ Loading saved weights into the model"""
+    def load_weights(self, filepath: str):
         data = np.load(filepath)
         self.sequential.set_state(data)
-        print(f"Weights loaded from {filepath}")
+        print(f"Weights loaded : {filepath}")
