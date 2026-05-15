@@ -4,7 +4,7 @@ from .linear import Linear
 from .residual_block import ResidualBlock
 from .multiSelfAttentionHead import MultiSelfAttentionHead
 from .activations import ReLU
-from ..sequential import Sequential
+from .sequential import Sequential
 
 import numpy as np
 
