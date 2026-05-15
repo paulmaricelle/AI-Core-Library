@@ -13,8 +13,10 @@ from .samplingLayer import SamplingLayer
 from .multiSelfAttentionHead import MultiSelfAttentionHead
 from .sequential import Sequential
 from .transformerBlock import TransformerBlock
+from .embedding import Embedding
+from .positionalEncoding import SineCosEncoder
 
 __all__ = ["Layer", "Linear", "ReLU", "Sigmoid", "Tanh", "Dropout",
            "LayerNormalization", "Conv2d", "MaxPooling2D", "Flatten",
            "ResidualBlock", "ConvTranspose2d", "Reshape", "SamplingLayer",
-           "MultiSelfAttentionHead", "Sequential", "TransformerBlock"]
+           "MultiSelfAttentionHead", "Sequential", "TransformerBlock", "Embedding", "SineCosEncoder"]
