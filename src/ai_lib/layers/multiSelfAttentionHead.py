@@ -1,8 +1,9 @@
 from .layer import Layer
 import numpy as np
+from typing import Optional
 
 class MultiSelfAttentionHead(Layer):
-    def __init__(self, n_heads: int, d_model: int) -> None:
+    def __init__(self, n_heads: int, d_model: int, is_causal=False) -> None:
         """
         Initializes query, key and value matrices for self-attention mechanism 
         with n_heads heads each using d_model / n_heads -dimension queries, keys and values
@@ -13,6 +14,10 @@ class MultiSelfAttentionHead(Layer):
 
         assert d_model % n_heads == 0
         self.d_k = d_model // n_heads
+
+        self.use_cache = True
+        self.kv_cache: Optional[np.ndarray] = None
+        self.is_causal = is_causal
 
         self.W_q = np.random.randn(d_model, d_model) * np.sqrt(2 / d_model)
         self.W_k = np.random.randn(d_model, d_model) * np.sqrt(2 / d_model)
@@ -38,8 +43,23 @@ class MultiSelfAttentionHead(Layer):
         K = K.reshape(B, T, self.n_heads, self.d_k)
         V = V.reshape(B, T, self.n_heads, self.d_k)
 
+        # If kv_cache is used :
+        if self.use_cache:
+            if self.kv_cache is not None:
+                past_K, past_V = self.kv_cache
+                # Concatenate past and present along "time" axis
+                K = np.concatenate([past_K, K], axis=1)
+                V = np.concatenate([past_V, V], axis=1)
+            
+            self.kv_cache = (K, V)
+
         # Shape (B, n_head, T, T)
         S = np.einsum('btnd,bsnd->bnts', Q, K) / np.sqrt(self.d_k)
+
+        # Causal mask: When is_causal, tokens only attend to previous ones.
+        if self.is_causal:
+            mask = np.triu(np.ones((T, S.shape[3])), k=1).astype(bool)
+            S[:, :, mask] = -np.inf
 
         S_max = np.max(S, axis=-1, keepdims=True)
         exp_S = np.exp(S - S_max) 
@@ -117,3 +137,9 @@ class MultiSelfAttentionHead(Layer):
         self.W_k = state["W_k"].copy()
         self.W_v = state["W_v"].copy()
         self.W_o = state["W_o"].copy()
+
+    def set_use_cache(self, use_cache: bool) -> None:
+        self.use_cache = use_cache
+        
+    def reset_cache(self) -> None:
+        self.kv_cache = None

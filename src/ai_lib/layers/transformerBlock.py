@@ -10,7 +10,7 @@ import numpy as np
 
 
 class TransformerBlock(Layer):
-    def __init__(self, n_heads: int, d_model: int, d_ff: int) -> None:
+    def __init__(self, n_heads: int, d_model: int, d_ff: int, is_causal: bool) -> None:
         """
         Initializes a TransformerBlock with pre-normalization :
         ResidualBlock( _, MultiSelfHeadAttention(LayerNorm())) -> LayerNorm -> ResidualBlock(FFN with d_ff-dimension hidden layer)
@@ -18,7 +18,7 @@ class TransformerBlock(Layer):
         super().__init__()
 
         ln1 = LayerNormalization(d_model)
-        mha = MultiSelfAttentionHead(n_heads=n_heads, d_model=d_model)
+        mha = MultiSelfAttentionHead(n_heads=n_heads, d_model=d_model, is_causal=is_causal)
 
         ln2 = LayerNormalization(d_model)
         

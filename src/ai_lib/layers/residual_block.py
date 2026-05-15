@@ -96,3 +96,11 @@ class ResidualBlock(Layer):
                     
             if shortcut_state:
                 self.shortcut.set_state(shortcut_state)
+
+    def set_use_cache(self, use_cache: bool) -> None:
+        for layer in self.layers:
+            layer.set_use_cache(use_cache)
+
+    def reset_cache(self) -> None:
+        for layer in self.layers:
+            layer.reset_cache()

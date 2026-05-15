@@ -27,3 +27,9 @@ class Layer:
     def set_state(self) -> None:
         """ Sets parameters using a dictionnary"""
         raise NotImplementedError("The set_state method is not implemented")
+    
+    def set_use_cache(self, use_cache: bool) -> None:
+        pass
+    
+    def reset_cache(self) -> None:
+        pass

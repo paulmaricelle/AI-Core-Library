@@ -2,7 +2,6 @@ from .layer import Layer
 
 class Sequential(Layer):
     def __init__(self, layers: list):
-        super().__init__()
         self.layers = layers
     
     def forward(self, X):
@@ -44,3 +43,11 @@ class Sequential(Layer):
             layer_state = {k.split('_', 1)[1]: v for k, v in state.items() if k.startswith(f"{i}_")}
             if layer_state:
                 layer.set_state(layer_state)
+
+    def set_use_cache(self, use_cache: bool) -> None:
+        for layer in self.layers:
+            layer.set_use_cache(use_cache)
+
+    def reset_cache(self) -> None:
+        for layer in self.layers:
+            layer.reset_cache()
