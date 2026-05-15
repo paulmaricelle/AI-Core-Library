@@ -25,7 +25,7 @@ class TransformerBlock(Layer):
         res_mha = ResidualBlock([ln1, mha])
         res_ffn = ResidualBlock([ln2, Linear(d_model, d_ff), ReLU(), Linear(d_ff, d_model)])
 
-        self.seq = Sequential([res_mha, ln2, res_ffn])
+        self.seq = Sequential([res_mha, res_ffn])
 
     def forward(self, X: np.ndarray) -> np.ndarray:
         return self.seq.forward(X)
