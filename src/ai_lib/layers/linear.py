@@ -63,5 +63,5 @@ class Linear(Layer):
         return {'W' : self.W, 'b' : self.b}
     
     def set_state(self, state):
-        self.W = state["W"]
-        self.b = state["b"]
+        self.W = state["W"].copy()
+        self.b = state["b"].copy()

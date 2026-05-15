@@ -53,5 +53,5 @@ class LayerNormalization(Layer):
         return {'gamma' : self.gamma, 'beta' : self.beta}
     
     def set_state(self, state):
-        self.gamma = state["gamma"]
-        self.beta = state["beta"]
+        self.gamma = state["gamma"].copy()
+        self.beta = state["beta"].copy()
