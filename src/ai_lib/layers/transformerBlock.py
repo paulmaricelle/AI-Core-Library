@@ -38,10 +38,20 @@ class TransformerBlock(Layer):
 
     def get_grads(self) -> list:
         return self.seq.get_grads()
+    
+    def zero_grad(self):
+        return self.seq.zero_grad()
+    
+    def get_reg_info(self):
+        return self.seq.get_reg_info()
+    
+    def set_training(self, training_mode):
+        return self.seq.set_training(training_mode)
 
     def get_state(self) -> dict:
         return self.seq.get_state()
 
     def set_state(self, state: dict) -> None:
         self.seq.set_state(state)
+
     

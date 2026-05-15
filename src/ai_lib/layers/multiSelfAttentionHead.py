@@ -15,7 +15,7 @@ class MultiSelfAttentionHead(Layer):
         assert d_model % n_heads == 0
         self.d_k = d_model // n_heads
 
-        self.use_cache = True
+        self.use_cache = False
         self.kv_cache: Optional[np.ndarray] = None
         self.is_causal = is_causal
 
@@ -83,6 +83,11 @@ class MultiSelfAttentionHead(Layer):
         """
         Computes the gradients of the loss with respect to the parameters and to X
         """
+
+        if self.use_cache:
+            raise RuntimeError("KV cache currently is active. Make sure it is not during training")
+
+
         B, T, D = self.X.shape
         dW_o = np.einsum('bid,bij->dj', self.Z, d_output)
 
