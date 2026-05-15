@@ -80,6 +80,10 @@ class Model:
     
     def predict_proba(self, X: np.ndarray) -> np.ndarray:
         logits = self.predict(X)
+        if (logits.shape)[-1] == 1:
+            raise RuntimeError("Predict_proba is not intended for binary classification. Use Predict() instead.\n"
+                "This method is designed to transform logits into probabilities for multiclass classification, "
+                "since the softmaxCrossEntropy loss expects raw logits.")
         exp = np.exp(logits - np.max(logits, axis=1, keepdims=True))
         return exp / np.sum(exp, axis=1, keepdims=True)
     
