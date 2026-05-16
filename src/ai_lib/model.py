@@ -35,6 +35,10 @@ class Model:
         best_loss = np.inf
         wait = 0
 
+        # Turn off cache and resets it
+        self.sequential.set_use_cache(False)
+        self.sequential.reset_cache()
+
         for epoch in range(epochs):
             loss_value = 0
             self.sequential.set_training(True)
