@@ -63,8 +63,14 @@ class MultiSelfAttentionHead(Layer):
 
         # Causal mask: When is_causal, tokens only attend to previous ones.
         if self.is_causal:
-            mask = np.triu(np.ones((T, S.shape[3])), k=1).astype(bool)
+            T_q = T              # Temporal length of queries
+            T_k = S.shape[3]     # Temporal length of keys (entire cache)
+
+            offset = T_k - T_q  # Offset for the diagonal of the mask since the newly computed attention will be (Tq, Tk)
+
+            mask = np.triu(np.ones((T_q, T_k)), k=offset + 1).astype(bool)
             S[:, :, mask] = -np.inf
+            
 
         S_max = np.max(S, axis=-1, keepdims=True)
         exp_S = np.exp(S - S_max) 
