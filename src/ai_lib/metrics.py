@@ -2,23 +2,48 @@ import numpy as np
 
 # Some metrics need the classification threshold therefore it is everywhere
 # as an argument to ease the computation of metrics
-def accuracy(y_pred, y_true, threshold):
-    preds = np.argmax(y_pred, axis=1)
-    truth = np.argmax(y_true, axis=1)
-    return round(np.mean(preds==truth), 5)
+def accuracy(y_pred, y_true, threshold=0.5):
+    """
+    Computes accuracy on multiclass classification. Works on both "one hot encoded'-y and "index prediction"-y
+    """
+    preds = np.argmax(y_pred, axis=-1)
+    
+    # Checks shape to infer y format
+    if y_true.shape == y_pred.shape:
+        # One-Hot (Such as for MNIST)
+        truth = np.argmax(y_true, axis=-1)
+    else:
+        # Sparse (Such as for LLMs)
+        truth = y_true
+        
+    return round(np.mean(preds == truth), 5)
 
 def recall(y_pred, y_true, threshold=0.5):
-    mask = y_pred > threshold
-    truth = y_true.astype(int)
-    tp = np.sum((mask == True ) & (truth == 1))
-    fn = np.sum((mask == False ) & (truth == 1))
+    """
+    Computes recall : True positive / All real positive
+    """
+    pred_flat = y_pred.reshape(-1)
+    truth_flat = y_true.reshape(-1).astype(int)
+    
+    mask = pred_flat > threshold
+    
+    tp = np.sum((mask == True) & (truth_flat == 1))
+    fn = np.sum((mask == False) & (truth_flat == 1))
+    
     return tp / (tp + fn + 1e-15)
 
 def precision(y_pred, y_true, threshold=0.5):
-    mask = y_pred > threshold
-    truth = y_true.astype(int)
-    tp = np.sum((mask == True ) & (truth == 1))
-    fp = np.sum((mask == True ) & (truth == 0))
+    """
+    Computes precision : True positive / All predicted positive
+    """
+    pred_flat = y_pred.reshape(-1)
+    truth_flat = y_true.reshape(-1).astype(int)
+    
+    mask = pred_flat > threshold
+    
+    tp = np.sum((mask == True) & (truth_flat == 1))
+    fp = np.sum((mask == True) & (truth_flat == 0))
+    
     return tp / (tp + fp + 1e-15)
 
 def mae(y_pred, y_true, threshold):
