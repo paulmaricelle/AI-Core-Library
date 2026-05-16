@@ -17,13 +17,17 @@ class TransformerBlock(Layer):
         """
         super().__init__()
 
-        self.ln1 = LayerNormalization(d_model)
-        self.mha = MultiSelfAttentionHead(n_heads=n_heads, d_model=d_model, is_causal=is_causal)
-
-        self.ln2 = LayerNormalization(d_model)
+        res_mha = ResidualBlock([
+            LayerNormalization(d_model),
+            MultiSelfAttentionHead(n_heads=n_heads, d_model=d_model, is_causal=is_causal)
+        ])
         
-        res_mha = ResidualBlock([self.ln1, self.mha])
-        res_ffn = ResidualBlock([self.ln2, Linear(d_model, d_ff), ReLU(), Linear(d_ff, d_model)])
+        res_ffn = ResidualBlock([
+            LayerNormalization(d_model), 
+            Linear(d_model, d_ff), 
+            ReLU(), 
+            Linear(d_ff, d_model)
+        ])
 
         self.seq = Sequential([res_mha, res_ffn])
 
@@ -55,11 +59,10 @@ class TransformerBlock(Layer):
         self.seq.set_state(state)
 
     def set_use_cache(self, use_cache: bool) -> None:
-        self.use_cache = use_cache
-        self.mha.set_use_cache(use_cache)
+        self.seq.set_use_cache(use_cache)
 
     def reset_cache(self) -> None:
-        self.mha.reset_cache()
+        self.seq.reset_cache()
 
 
     
