@@ -178,6 +178,7 @@ class RoPEMultiAttentionHead(Layer):
         """
         Initializes query, key and value matrices for self-attention mechanism 
         with n_heads heads each using d_model / n_heads -dimension queries, keys and values
+        With ATTENTION SINK
         block_size : Context window
         """
         super().__init__()
@@ -258,11 +259,17 @@ class RoPEMultiAttentionHead(Layer):
             K = np.concatenate([past_K, K], axis=1)
             V = np.concatenate([past_V, V], axis=1)
             
-        # Sliding context window 
+        # Sliding context window + ATTENTION SINK
         if self.use_cache and K.shape[1] > self.block_size:
-            # Only keeps the block_size last tokens, removes the others from RAM with .copy()
-            K = K[:, -self.block_size:, :, :].copy()
-            V = V[:, -self.block_size:, :, :].copy()
+            n_sinks = 4  # Industry standard
+            n_recent = self.block_size - n_sinks
+            
+            # Only keeps the block_size last tokens (including the sinks now so not exactly),
+            # removes the others from RAM with .copy()
+            K = np.concatenate([K[:, :n_sinks, :, :], K[:, -n_recent:, :, :]], axis=1).copy()
+            V = np.concatenate([V[:, :n_sinks, :, :], V[:, -n_recent:, :, :]], axis=1).copy()
+
+            n_sinks = 4
             
         if self.use_cache:
             self.kv_cache = (K, V)
