@@ -2,7 +2,7 @@ from .layer import Layer
 from .layer_normalization import LayerNormalization
 from .linear import Linear
 from .residual_block import ResidualBlock
-from .multiSelfAttentionHead import MultiSelfAttentionHead
+from .multiSelfAttentionHead import MultiSelfAttentionHead, RoPEMultiAttentionHead
 from .activations import ReLU
 from .dropout import Dropout
 from .sequential import Sequential
@@ -11,16 +11,21 @@ import numpy as np
 
 
 class TransformerBlock(Layer):
-    def __init__(self, n_heads: int, d_model: int, d_ff: int, is_causal: bool, dropout_rate: float =0) -> None:
+    def __init__(self, n_heads: int, d_model: int, d_ff: int, is_causal: bool, context_window: int, dropout_rate: float =0, RoPE = False) -> None:
         """
         Initializes a TransformerBlock with pre-normalization :
         ResidualBlock( _, MultiSelfHeadAttention(LayerNorm())) -> LayerNorm -> ResidualBlock(FFN with d_ff-dimension hidden layer)
+        context_window : For RoPE only; otherwise simply ignored
         """
         super().__init__()
-
+        if RoPE:
+            mha = RoPEMultiAttentionHead(n_heads=n_heads, d_model=d_model, is_causal=is_causal, block_size=context_window)
+        else:
+            mha = MultiSelfAttentionHead(n_heads=n_heads, d_model=d_model, is_causal=is_causal, )
+        
         res_mha = ResidualBlock([
             LayerNormalization(d_model),
-            MultiSelfAttentionHead(n_heads=n_heads, d_model=d_model, is_causal=is_causal),
+            mha,
             Dropout(dropout_rate=dropout_rate)
         ])
         
