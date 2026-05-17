@@ -54,9 +54,12 @@ class FilteredBPETokenizer:
 
 
 from tokenizers import Tokenizer
-class CustomBPETokenizer():
-    def __init__(self, path="shakespeare_bpe_1500.json"):
+from tokenizers import decoders
+class CustomBPETokenizer:
+    def __init__(self, path):
         self.tokenizer = Tokenizer.from_file(path)
+        self.tokenizer.decoder = decoders.ByteLevel()
+        
         self.vocab_size = self.tokenizer.get_vocab_size()
 
     def encode(self, text: str) -> list:
