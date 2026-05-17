@@ -268,8 +268,6 @@ class RoPEMultiAttentionHead(Layer):
             # removes the others from RAM with .copy()
             K = np.concatenate([K[:, :n_sinks, :, :], K[:, -n_recent:, :, :]], axis=1).copy()
             V = np.concatenate([V[:, :n_sinks, :, :], V[:, -n_recent:, :, :]], axis=1).copy()
-
-            n_sinks = 4
             
         if self.use_cache:
             self.kv_cache = (K, V)
