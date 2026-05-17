@@ -4,13 +4,14 @@ from .linear import Linear
 from .residual_block import ResidualBlock
 from .multiSelfAttentionHead import MultiSelfAttentionHead
 from .activations import ReLU
+from .dropout import Dropout
 from .sequential import Sequential
 
 import numpy as np
 
 
 class TransformerBlock(Layer):
-    def __init__(self, n_heads: int, d_model: int, d_ff: int, is_causal: bool) -> None:
+    def __init__(self, n_heads: int, d_model: int, d_ff: int, is_causal: bool, dropout_rate: float =0) -> None:
         """
         Initializes a TransformerBlock with pre-normalization :
         ResidualBlock( _, MultiSelfHeadAttention(LayerNorm())) -> LayerNorm -> ResidualBlock(FFN with d_ff-dimension hidden layer)
@@ -19,14 +20,16 @@ class TransformerBlock(Layer):
 
         res_mha = ResidualBlock([
             LayerNormalization(d_model),
-            MultiSelfAttentionHead(n_heads=n_heads, d_model=d_model, is_causal=is_causal)
+            MultiSelfAttentionHead(n_heads=n_heads, d_model=d_model, is_causal=is_causal),
+            Dropout(dropout_rate=dropout_rate)
         ])
         
         res_ffn = ResidualBlock([
             LayerNormalization(d_model), 
             Linear(d_model, d_ff), 
             ReLU(), 
-            Linear(d_ff, d_model)
+            Linear(d_ff, d_model),
+            Dropout(dropout_rate=dropout_rate)
         ])
 
         self.seq = Sequential([res_mha, res_ffn])

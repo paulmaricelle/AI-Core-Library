@@ -1,3 +1,3 @@
-from .tokenizers import CharTokenizer
+from .tokenizers import CharTokenizer, FilteredBPETokenizer
 
-__all__ = ["CharTokenizer"]
+__all__ = ["CharTokenizer", "FilteredBPETokenizer"]
