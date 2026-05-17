@@ -1,3 +1,3 @@
-from .tokenizers import CharTokenizer, FilteredBPETokenizer
+from .tokenizers import CharTokenizer, FilteredBPETokenizer, CustomBPETokenizer
 
-__all__ = ["CharTokenizer", "FilteredBPETokenizer"]
+__all__ = ["CharTokenizer", "FilteredBPETokenizer", "CustomBPETokenizer"]

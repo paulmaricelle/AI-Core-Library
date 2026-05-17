@@ -10,7 +10,7 @@ from .residual_block import ResidualBlock
 from .conv_transpose2d import ConvTranspose2d
 from .reshape import Reshape
 from .samplingLayer import SamplingLayer
-from .multiSelfAttentionHead import MultiSelfAttentionHead
+from .multiSelfAttentionHead import MultiSelfAttentionHead, RoPEMultiAttentionHead
 from .sequential import Sequential
 from .transformerBlock import TransformerBlock
 from .embedding import Embedding
@@ -19,4 +19,4 @@ from .positionalEncoding import SineCosEncoder
 __all__ = ["Layer", "Linear", "ReLU", "Sigmoid", "Tanh", "Dropout",
            "LayerNormalization", "Conv2d", "MaxPooling2D", "Flatten",
            "ResidualBlock", "ConvTranspose2d", "Reshape", "SamplingLayer",
-           "MultiSelfAttentionHead", "Sequential", "TransformerBlock", "Embedding", "SineCosEncoder"]
+           "MultiSelfAttentionHead", "Sequential", "TransformerBlock", "Embedding", "SineCosEncoder", "RoPEMultiAttentionHead"]
