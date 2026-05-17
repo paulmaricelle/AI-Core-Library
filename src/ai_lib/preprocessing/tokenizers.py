@@ -16,8 +16,8 @@ class CharTokenizer:
         if isinstance(tokens, int) or isinstance(tokens, np.integer):
             tokens = [tokens]
         return "".join([self.idx_to_char[i] for i in tokens])
-    
-import tiktoken
+
+import tiktoken   
 class FilteredBPETokenizer:
     def __init__(self, corpus: str, encoding_name = "gpt2"):
         """
@@ -51,3 +51,16 @@ class FilteredBPETokenizer:
     def decode(self, tokens: list) -> list:
         raw_tokens = [self.new_to_old[t] for t in tokens]
         return self.base_tokenizer.decode(raw_tokens)
+
+
+from tokenizers import Tokenizer
+class CustomBPETokenizer():
+    def __init__(self, path="shakespeare_bpe_1500.json"):
+        self.tokenizer = Tokenizer.from_file(path)
+        self.vocab_size = self.tokenizer.get_vocab_size()
+
+    def encode(self, text: str) -> list:
+        return self.tokenizer.encode(text).ids
+
+    def decode(self, tokens: list) -> str:
+        return self.tokenizer.decode(tokens)
