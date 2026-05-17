@@ -23,3 +23,9 @@ class Momentum(Optimizer):
             self.momentums[i] = self.beta * self.momentums[i] + ((1-self.beta)/accumulation_steps) * self.grads[i]
             self.params[i] -= self.lr * (self.momentums[i] + self.weight_decay * (self.params[i] if self.to_reg[i] == True else 0))
 
+    def setup(self, layers):
+        super().setup(layers)
+        
+        # Only initialize Momentum parameters if it's the first run
+        if len(self.momentums) == 0:
+            self._init_state()

@@ -1,6 +1,6 @@
 from .opti import Optimizer
 import numpy as np
-from typing import List
+from typing import List, Optional
 
 class Adam(Optimizer):
     def __init__(self, learning_rate: float = 1e-3, beta_1: float = 0.9, beta_2: float = 0.999, epsilon: float = 1e-8, weight_decay: float =0):
@@ -12,7 +12,7 @@ class Adam(Optimizer):
         self.weight_decay = weight_decay
         self.m: List[np.ndarray] = []
         self.v: List[np.ndarray] = []
-        self.t: int = 1
+        self.t: Optional[int] = None
 
     def _init_state(self):
         self.m = [np.zeros_like(p) for p in self.params]
@@ -37,3 +37,10 @@ class Adam(Optimizer):
             self.params[i] -= self.lr * ((m_hat / (np.sqrt(v_hat) + self.epsilon)) + self.weight_decay * (self.params[i] if self.to_reg[i] == True else 0))
 
         self.t += 1
+
+    def setup(self, layers):
+        super().setup(layers)
+        
+        # Only initialize Adam parameters if it's the first run
+        if self.t is None:
+            self._init_state()
