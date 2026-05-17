@@ -9,8 +9,8 @@ class LayerNormalization(Layer):
         self.n_features = n_features
         self.epsilon = epsilon
         
-        self.gamma = np.ones(self.n_features)
-        self.beta = np.zeros(self.n_features)
+        self.gamma = np.ones(self.n_features).astype(np.float32)
+        self.beta = np.zeros(self.n_features).astype(np.float32)
 
         self.grad_gamma: Optional[np.ndarray] = None
         self.grad_beta: Optional[np.ndarray] = None

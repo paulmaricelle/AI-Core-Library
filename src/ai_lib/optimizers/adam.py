@@ -15,8 +15,8 @@ class Adam(Optimizer):
         self.t: Optional[int] = None
 
     def _init_state(self):
-        self.m = [np.zeros_like(p) for p in self.params]
-        self.v = [np.zeros_like(p) for p in self.params]
+        self.m = [np.zeros_like(p, dtype=np.float32) for p in self.params]
+        self.v = [np.zeros_like(p, dtype=np.float32) for p in self.params]
         self.t = 1
         
     def step(self, accumulation_steps: int) -> None:

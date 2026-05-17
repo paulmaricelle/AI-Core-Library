@@ -7,12 +7,12 @@ class Linear(Layer):
         super().__init__()
         if init_method == "xavier":
             limit = np.sqrt(6.0 / (n_out + n_input))
-            self.W = np.random.uniform(-limit, limit, (n_out, n_input))
+            self.W = np.random.uniform(-limit, limit, (n_out, n_input)).astype(np.float32)
         elif init_method == "he":
             std = np.sqrt(2 / n_input)
-            self.W = np.random.randn(n_out, n_input) * std
+            self.W = np.random.randn(n_out, n_input).astype(np.float32) * std
         else:
-            self.W = np.random.randn(n_out, n_input) * 10e-2
+            self.W = np.random.randn(n_out, n_input).astype(np.float32) * 10e-2
         self.b = np.zeros((1, n_out))
 
         self.grad_W: Optional[np.ndarray] = None

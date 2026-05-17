@@ -7,7 +7,7 @@ class Embedding(Layer):
         self.vocab_size = vocab_size
         self.d_model = d_model
 
-        self.W = np.random.randn(vocab_size, d_model) * 0.01
+        self.W = np.random.randn(vocab_size, d_model).astype(np.float32) * 0.01
         self.dW = None
 
     def forward(self, X: np.ndarray) -> np.ndarray:
@@ -21,7 +21,7 @@ class Embedding(Layer):
     
     def backward(self, dOutput: np.ndarray) -> None:
         if self.dW is None:
-            self.dW = np.zeros_like(self.W)
+            self.dW = np.zeros_like(self.W, dtype=np.float32)
         np.add.at(self.dW, self.X, dOutput)
 
     def get_params(self):
