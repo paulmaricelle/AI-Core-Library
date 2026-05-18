@@ -8,11 +8,6 @@ env/
 venv/
 .env
 
-# Distribution / Build
-dist/
-build/
-*.egg-info/
-
 # Unit Testing
 .pytest_cache/
 .coverage
@@ -23,11 +18,11 @@ data/
 models/*.pth        
 models/*.npy        
 outputs/            
+weights/
 
 # OS spécifiques
 .DS_Store
 Thumbs.db
 
 brouillon.ipynb
-
-weights/
+.vscode/
