@@ -83,3 +83,32 @@ class Tanh(Layer):
     
     def set_state(self, state):
         pass
+
+class SiLU(Layer):
+    def __init__(self):
+        super().__init__()
+        self.output: Optional[np.ndarray] = None
+        self.sigmoid: Optional[np.ndarray] = None
+
+    def forward(self, X: np.ndarray) -> np.ndarray:
+        self.sigmoid = 1 / (1+np.exp(-X))
+        self.output = X * self.sigmoid
+        return self.output
+    
+    def backward(self, grad_wrt_output: np.ndarray) -> np.ndarray:
+        return grad_wrt_output * (self.sigmoid + self.output * (1 - self.sigmoid))
+    
+    def get_params(self):
+        return []
+
+    def get_reg_info(self):
+        return []
+        
+    def get_grads(self):
+        return []
+    
+    def get_state(self):
+        return {}
+    
+    def set_state(self, state):
+        pass
