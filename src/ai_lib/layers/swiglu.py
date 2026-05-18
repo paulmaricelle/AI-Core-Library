@@ -48,7 +48,11 @@ class SwiGLU(Layer):
         dgate = dgate_silu * (self.gate_sigmoid + self.gate_silu * (1.0 - self.gate_sigmoid))
         
         dproj = np.concatenate([dgate, dvalue], axis=-1)
-        self.grad_W13 = self.input.T @ dproj
+
+        dproj_flat = dproj.reshape(-1, dproj.shape[-1])
+        input_flat = self.input.reshape(-1, self.input.shape[-1])
+        
+        self.grad_W13 = input_flat.T @ dproj_flat
         
         return dproj @ self.W13.T
     
