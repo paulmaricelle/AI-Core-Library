@@ -21,6 +21,7 @@ class SwiGLU(Layer):
         self.gate_sigmoid: Optional[np.ndarray] = None
         self.gate_silu: Optional[np.ndarray] = None
         self.value: Optional[np.ndarray] = None
+        self.h: Optional[np.ndarray] = None
 
     def forward(self, X: np.ndarray) -> np.ndarray:
         self.input = X
@@ -33,13 +34,16 @@ class SwiGLU(Layer):
         self.gate_silu = gate * self.gate_sigmoid
         
         # Gating
-        h = self.gate_silu * self.value
+        self.h = self.gate_silu * self.value
         
         # Final projection
-        return h @ self.W2
+        return self.h @ self.W2
 
     def backward(self, grad_wrt_output: np.ndarray) -> np.ndarray:
-        self.grad_W2 = (self.gate_silu * self.value).T @ grad_wrt_output
+        h_flat = self.h.reshape(-1, self.h.shape[-1])
+        grad_out_flat = grad_wrt_output.reshape(-1, grad_wrt_output.shape[-1])
+        
+        grad_W2_current = h_flat.T @ grad_out_flat
         dh = grad_wrt_output @ self.W2.T
 
         dvalue = dh * self.gate_silu
@@ -52,7 +56,14 @@ class SwiGLU(Layer):
         dproj_flat = dproj.reshape(-1, dproj.shape[-1])
         input_flat = self.input.reshape(-1, self.input.shape[-1])
         
-        self.grad_W13 = input_flat.T @ dproj_flat
+        grad_W13_current = input_flat.T @ dproj_flat
+
+        if self.grad_W2 is None:
+            self.grad_W2 = grad_W2_current
+            self.grad_W13 = grad_W13_current
+        else:
+            self.grad_W2 += grad_W2_current
+            self.grad_W13 += grad_W13_current
         
         return dproj @ self.W13.T
     
