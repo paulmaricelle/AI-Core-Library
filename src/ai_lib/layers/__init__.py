@@ -2,7 +2,7 @@ from .layer import Layer
 from .linear import Linear
 from .activations import ReLU, Sigmoid, Tanh
 from .dropout import Dropout
-from .layer_normalization import LayerNormalization
+from .normalization import LayerNormalization, RMSNorm
 from .conv2d import Conv2d
 from .max_pooling2d import MaxPooling2D
 from .flatten import Flatten
@@ -19,4 +19,4 @@ from .positionalEncoding import SineCosEncoder
 __all__ = ["Layer", "Linear", "ReLU", "Sigmoid", "Tanh", "Dropout",
            "LayerNormalization", "Conv2d", "MaxPooling2D", "Flatten",
            "ResidualBlock", "ConvTranspose2d", "Reshape", "SamplingLayer",
-           "MultiSelfAttentionHead", "Sequential", "TransformerBlock", "Embedding", "SineCosEncoder", "RoPEMultiAttentionHead"]
+           "MultiSelfAttentionHead", "Sequential", "TransformerBlock", "Embedding", "SineCosEncoder", "RoPEMultiAttentionHead", "RMSNorm"]

@@ -1,5 +1,5 @@
 from .layer import Layer
-from .layer_normalization import LayerNormalization
+from .normalization import LayerNormalization
 from .linear import Linear
 from .residual_block import ResidualBlock
 from .multiSelfAttentionHead import MultiSelfAttentionHead, RoPEMultiAttentionHead
