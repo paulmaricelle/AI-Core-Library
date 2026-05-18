@@ -51,3 +51,23 @@ class SwiGLU(Layer):
         self.grad_W13 = self.input.T @ dproj
         
         return dproj @ self.W13.T
+    
+    def get_params(self):
+        return [self.W13, self.W2]
+    
+    def get_grads(self):
+        return [self.grad_W13, self.grad_W2]
+    
+    def get_reg_info(self):
+        return [True, True]
+    
+    def zero_grad(self):
+        self.grad_W13 = None
+        self.grad_W2 = None
+
+    def get_state(self):
+        return {'W13' : self.W13, 'W2' : self.W2}
+    
+    def set_state(self, state):
+        self.W13 = state["W13"].copy()
+        self.W2 = state["W2"].copy()
