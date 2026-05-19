@@ -412,7 +412,7 @@ def apply_rotary_embedding(x: np.ndarray, cos: np.ndarray, sin: np.ndarray) -> n
     return x * cos + x_rotated * sin
 
 
-class GQARoPEMultiAttentionHead(Layer):
+class GQARoPEAttentionHead(Layer):
     def __init__(self, n_heads: int, n_kv_heads: int, d_model: int, block_size: int, is_causal=False) -> None:
 
         """
