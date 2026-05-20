@@ -41,3 +41,34 @@ class Embedding(Layer):
 
     def set_state(self, state):
         self.W = state["W"].copy()
+
+class TiedOutputProjection(Layer):
+    def __init__(self, embedding_layer: Layer):
+        self.embedding_layer = embedding_layer
+
+    def forward(self, X:np.ndarray) -> np.ndarray:
+        self.input = X
+        return X @ self.embedding_layer.W.T
+    
+    def backward(self, grad_wrt_output: np.ndarray) -> np.ndarray:
+        dX = grad_wrt_output @ self.embedding_layer.W
+        
+        X_flat = self.input.reshape(-1, self.input.shape[-1])
+        grad_flat = grad_wrt_output.reshape(-1, grad_wrt_output.shape[-1])
+        
+        dW_out = (X_flat.T @ grad_flat).T
+        
+        if getattr(self.embedding_layer, 'dW', None) is None:
+            self.embedding_layer.dW = dW_out
+        else:
+            self.embedding_layer.dW += dW_out
+            
+        return dX
+    
+    # This layer does not handle parameters for the optimizer
+    def get_params(self): return []
+    def get_grads(self): return []
+    def get_reg_info(self): return []
+    
+    def get_state(self): return {}
+    def set_state(self, state): pass

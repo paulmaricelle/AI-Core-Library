@@ -5,3 +5,4 @@ from .layers.sequential import Sequential
 from .model import Model
 from .metrics import mae, mse, accuracy, binary_metrics
 from .dataLoader import DataLoader, SequenceDataLoader
+from .lrSchedulers import CosineWarmupScheduler

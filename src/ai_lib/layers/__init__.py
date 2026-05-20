@@ -13,7 +13,7 @@ from .samplingLayer import SamplingLayer
 from .multiSelfAttentionHead import MultiSelfAttentionHead, RoPEMultiAttentionHead, GQARoPEAttentionHead
 from .sequential import Sequential
 from .transformerBlock import TransformerBlock
-from .embedding import Embedding
+from .embedding import Embedding, TiedOutputProjection
 from .positionalEncoding import SineCosEncoder
 from .swiglu import SwiGLU
 
@@ -21,4 +21,5 @@ __all__ = ["Layer", "Linear", "ReLU", "Sigmoid", "Tanh", "Dropout",
            "LayerNormalization", "Conv2d", "MaxPooling2D", "Flatten",
            "ResidualBlock", "ConvTranspose2d", "Reshape", "SamplingLayer",
            "MultiSelfAttentionHead", "Sequential", "TransformerBlock", "Embedding",
-           "SineCosEncoder", "RoPEMultiAttentionHead", "RMSNorm", "SiLU", "SwiGLU", "GQARoPEAttentionHead"]
+           "SineCosEncoder", "RoPEMultiAttentionHead", "RMSNorm", "SiLU", "SwiGLU",
+           "GQARoPEAttentionHead", "TiedOutputProjection"]
