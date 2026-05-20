@@ -24,7 +24,8 @@ class Model:
             patience: int = 50, 
             accumulation_steps: int = 1, 
             metrics: List = [], 
-            binary_classification_threshold: float = 0.5, 
+            binary_classification_threshold: float = 0.5,
+            lr_scheduler = None,
             verbose: bool = True) -> None:
         
         optimizer.setup([self.sequential])
@@ -34,6 +35,8 @@ class Model:
         
         best_loss = np.inf
         wait = 0
+
+        global_step = 1
 
         # Turn off cache and resets it
         self.sequential.set_use_cache(False)
@@ -47,6 +50,10 @@ class Model:
 
             # Iterating on the DataLoader
             for i, (x_batch, y_batch) in enumerate(dataloader):
+
+                if lr_scheduler is not None:
+                    optimizer.lr = lr_scheduler.get_lr(global_step)
+                global_step +=1
                 
                 # Handling gradient accumulation
                 if i % accumulation_steps == 0:
