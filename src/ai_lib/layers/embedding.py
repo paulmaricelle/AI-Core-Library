@@ -34,7 +34,7 @@ class Embedding(Layer):
         self.dW = None
 
     def get_reg_info(self):
-        return [True]
+        return [False]
     
     def get_state(self):
         return {"W": self.W.copy()}

@@ -424,6 +424,10 @@ class GQARoPEAttentionHead(Layer):
         self.n_heads = n_heads
         self.d_model = d_model
         self.block_size = block_size
+        self.n_kv_heads = n_kv_heads
+
+        assert n_heads % n_kv_heads == 0
+        self.n_rep = n_heads // n_kv_heads
 
         assert d_model % n_heads == 0
         self.d_k = d_model // n_heads
@@ -469,8 +473,8 @@ class GQARoPEAttentionHead(Layer):
         # Reshaping for multi-head format (d_model -> (n_heads, d_k))
 
         Q = Q.reshape(B, T, self.n_heads, self.d_k)
-        K = K.reshape(B, T, self.n_heads, self.d_k)
-        V = V.reshape(B, T, self.n_heads, self.d_k)
+        K = K.reshape(B, T, self.n_kv_heads, self.d_k)
+        V = V.reshape(B, T, self.n_kv_heads, self.d_k)
 
         # RoPE
         if self.use_cache:
