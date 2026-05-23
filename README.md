@@ -46,8 +46,8 @@ L'objectif de ce projet est pédagogique et technique : démystifier la "boîte 
 
 ### Planificateurs (LR Schedulers)
 - `LRScheduler` (Classe abstraite de base)
-- `CosineWarmupScheduler` (Montée en régime linéaire suivie d'une décroissance en cosinus, indispensable pour la convergence des LLMs)
+- `CosineWarmupScheduler` (Montée en régime linéaire suivie d'une décroissance en cosinus, préférable pour la convergence des LLMs)
 
 ### Outils & Prétraitement
 - Implémentations d'inférence autoregressive avec gestion de la température (`generate`).
-- Tokenizers et DataLoaders adaptables pour la vision (MNIST) et le texte (BPE).
+- Tokenizers et DataLoaders adaptables pour la vision et le texte.
