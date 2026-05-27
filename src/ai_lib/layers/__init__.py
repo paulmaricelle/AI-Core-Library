@@ -16,10 +16,11 @@ from .transformerBlock import TransformerBlock
 from .embedding import Embedding, TiedOutputProjection
 from .positionalEncoding import SineCosEncoder
 from .swiglu import SwiGLU
+from .moe import MoEBlock
 
 __all__ = ["Layer", "Linear", "ReLU", "Sigmoid", "Tanh", "Dropout",
            "LayerNormalization", "Conv2d", "MaxPooling2D", "Flatten",
            "ResidualBlock", "ConvTranspose2d", "Reshape", "SamplingLayer",
            "MultiSelfAttentionHead", "Sequential", "TransformerBlock", "Embedding",
            "SineCosEncoder", "RoPEMultiAttentionHead", "RMSNorm", "SiLU", "SwiGLU",
-           "GQARoPEAttentionHead", "TiedOutputProjection"]
+           "GQARoPEAttentionHead", "TiedOutputProjection", "MoEBlock"]
