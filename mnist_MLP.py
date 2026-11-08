@@ -31,7 +31,7 @@ network = Sequential([layers.Linear(784, 256, "xavier"), layers.LayerNormalizati
                       layers.Linear(128, 10)])
 
 model = Model(network)
-#This achieves 98% accuracy on training set
+#This achieves 98% accuracy on validation set
 model.fit(train_loader, 50, losses.SoftmaxCrossEntropy(),
           optimizers.Adam(learning_rate=0.0001, weight_decay=0.01),
           validation_dataloader=val_loader, early_stopping=True,
