@@ -3,7 +3,7 @@ from src.ai_lib import layers
 from src.ai_lib import Sequential, Model
 from src.ai_lib import losses
 from src.ai_lib import optimizers
-from src.ai_lib import metrics
+from src.ai_lib import metrics, DataLoader
 
 def load_local_mnist(images_path, labels_path):
     with open(images_path, 'rb') as f:
@@ -20,6 +20,9 @@ def load_local_mnist(images_path, labels_path):
 
 X_train, Y_train = load_local_mnist('data/mnist/train-images.idx3-ubyte', 'data/mnist/train-labels.idx1-ubyte')
 X_val, Y_val = load_local_mnist('data/mnist/t10k-images.idx3-ubyte', 'data/mnist/t10k-labels.idx1-ubyte')
+
+train_loader = DataLoader(X_train, Y_train, batch_size=32)
+val_loader = DataLoader(X_val, Y_val, batch_size=32, shuffle=False)
 
 cnn = Sequential([layers.Conv2d(1, out_channels=8, kernel_size=3, stride=1, padding=1),
                   layers.ReLU(),
@@ -40,5 +43,8 @@ cnn = Sequential([layers.Conv2d(1, out_channels=8, kernel_size=3, stride=1, padd
                   ])
 
 model = Model(cnn)
-#This achieves 99% accuracy on the training set
-model.fit(X_train, Y_train, 50, losses.SoftmaxCrossEntropy(), optimizers.Adam(learning_rate=0.0001, weight_decay=0.01), batch_size=32, accumulation_steps=4, validation_data=[X_val, Y_val], early_stopping=True, patience=20, metrics=[metrics.accuracy])
+#This achieves 99% accuracy on the validation set
+model.fit(train_loader, 50, losses.SoftmaxCrossEntropy(),
+          optimizers.Adam(learning_rate=0.0001, weight_decay=0.01),
+          validation_dataloader=val_loader, early_stopping=True,
+          patience=20, accumulation_steps=4, metrics=[metrics.accuracy])
