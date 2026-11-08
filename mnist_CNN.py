@@ -43,7 +43,7 @@ cnn = Sequential([layers.Conv2d(1, out_channels=8, kernel_size=3, stride=1, padd
                   ])
 
 model = Model(cnn)
-#This achieves 99% accuracy on the training set
+#This achieves 99% accuracy on the validation set
 model.fit(train_loader, 50, losses.SoftmaxCrossEntropy(),
           optimizers.Adam(learning_rate=0.0001, weight_decay=0.01),
           validation_dataloader=val_loader, early_stopping=True,
